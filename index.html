@@ -364,13 +364,15 @@
   <section id="rewrite-view" style="display:none">
     <div class="card">
       <h2>✨ 修改版简历</h2>
-      <p class="hint" style="margin-bottom:14px">AI 只基于你的真实经历改写,不会虚构内容。文中 <strong>[X]</strong> 是数据占位符——请务必替换成你的真实数字后再使用。</p>
-      <pre id="rewrite-content" class="rw-output"></pre>
+      <p class="hint" style="margin-bottom:14px">AI 只基于你的真实经历改写,不会虚构内容。<strong>下方文本可以直接点击编辑</strong>——建议把 <strong>[X]</strong> 占位符替换成真实数据、填上姓名联系方式,再导出 PDF 投递。</p>
+      <pre id="rewrite-content" class="rw-output" contenteditable="true" spellcheck="false"></pre>
       <div class="actions" style="margin-top:16px">
-        <button class="btn-primary" id="copy-btn">复制全文</button>
-        <button class="btn-ghost" id="download-btn">下载 .md 文件</button>
-        <button class="btn-ghost" id="rewrite-back-btn">← 返回诊断报告</button>
+        <button class="btn-primary" id="pdf-btn">📑 导出 PDF 简历</button>
+        <button class="btn-ghost" id="copy-btn">复制全文</button>
+        <button class="btn-ghost" id="download-btn">下载 .md</button>
+        <button class="btn-ghost" id="rewrite-back-btn">← 返回报告</button>
       </div>
+      <p class="hint" style="margin-top:10px">导出时会自动去掉“待你补充的信息”备注区;在弹出的打印窗口里选择“另存为 PDF / 保存为 PDF”即可。</p>
     </div>
   </section>
 
@@ -733,6 +735,73 @@ $('copy-btn').addEventListener('click', async () => {
     $('copy-btn').textContent = '✓ 已复制';
   }
   setTimeout(() => { $('copy-btn').textContent = '复制全文'; }, 2000);
+});
+
+/* ---------- 导出 PDF(浏览器打印引擎生成文字版 PDF,对 ATS 友好) ---------- */
+function resumeMdToHtml(md) {
+  // 去掉"待你补充"备注区(从其上方最近的 --- 开始截断)
+  const lines = md.split('\n');
+  const noteIdx = lines.findIndex(l => l.includes('待你补充'));
+  let end = lines.length;
+  if (noteIdx > -1) {
+    end = noteIdx;
+    for (let i = noteIdx; i >= 0; i--) {
+      if (/^\s*-{3,}\s*$/.test(lines[i])) { end = i; break; }
+    }
+  }
+  const esc2 = (s) => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const inline = (s) => esc2(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+
+  let html = '', inList = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  for (const raw of lines.slice(0, end)) {
+    const l = raw.trim();
+    if (!l) { closeList(); continue; }
+    if (/^-{3,}$/.test(l)) { closeList(); html += '<hr>'; continue; }
+    if (l.startsWith('## ')) { closeList(); html += `<h2>${inline(l.slice(3))}</h2>`; continue; }
+    if (l.startsWith('# ')) { closeList(); html += `<h1>${inline(l.slice(2))}</h1>`; continue; }
+    if (/^[-•] /.test(l)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${inline(l.slice(2))}</li>`; continue;
+    }
+    if (l.startsWith('> ')) { closeList(); html += `<p class="lead">${inline(l.slice(2))}</p>`; continue; }
+    closeList(); html += `<p>${inline(l)}</p>`;
+  }
+  closeList();
+  return html;
+}
+
+$('pdf-btn').addEventListener('click', () => {
+  const md = $('rewrite-content').textContent;
+  const placeholders = (md.match(/\[X\]/g) || []).length;
+  if (placeholders > 0 && !confirm(`简历里还有 ${placeholders} 个 [X] 数据占位符没有填写。\n建议先点击文本直接编辑补全,再导出。\n\n仍要继续导出吗?`)) {
+    return;
+  }
+  const w = window.open('', '_blank');
+  if (!w) { alert('浏览器拦截了弹窗,请允许本站打开新窗口后重试。'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>简历</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      color:#1a1a1a; line-height:1.65; font-size:13px;
+      max-width:210mm; margin:0 auto; padding:14mm 16mm;
+    }
+    h1 { font-size:24px; text-align:center; margin-bottom:4px; letter-spacing:1px; }
+    h1 + p { text-align:center; color:#444; }
+    h2 {
+      font-size:15px; margin:14px 0 6px; padding-bottom:4px;
+      border-bottom:2px solid #2a78d6; color:#1c5cab;
+    }
+    p { margin:4px 0; }
+    .lead { color:#444; font-style:normal; background:#f2f7fd; padding:8px 12px; border-radius:6px; margin:8px 0; }
+    ul { margin:4px 0 8px 18px; }
+    li { margin:3px 0; }
+    hr { border:none; border-top:1px solid #ddd; margin:10px 0; }
+    @page { size: A4; margin: 0; }
+    @media print { body { padding:12mm 14mm; } }
+  </style></head><body>${resumeMdToHtml(md)}<script>window.onload=()=>{setTimeout(()=>window.print(),300)};<\/script></body></html>`);
+  w.document.close();
 });
 
 $('download-btn').addEventListener('click', () => {
