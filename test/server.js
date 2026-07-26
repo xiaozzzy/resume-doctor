@@ -27,7 +27,20 @@ const MOCK_REPORT = {
   ]
 };
 
+const MOCK_REWRITE = `# [姓名]\n\n**求职意向:AI 产品运营 | [电话] | [邮箱]**\n\n## 实习经历\n**某互联网公司 · 运营实习生**(2025.3 – 2025.6)\n- 独立运营公众号 [X] 个月,平均阅读量从 [X] 提升至 [X]\n\n---\n\n📝 待你补充的信息:\n1. 公众号运营数据`;
+
 http.createServer((req, res) => {
+  if (req.url === '/api/rewrite' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      setTimeout(() => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ content: MOCK_REWRITE }));
+      }, 600);
+    });
+    return;
+  }
   if (req.url === '/api/analyze' && req.method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
