@@ -367,12 +367,13 @@
       <p class="hint" style="margin-bottom:14px">AI 只基于你的真实经历改写,不会虚构内容。<strong>下方文本可以直接点击编辑</strong>——建议把 <strong>[X]</strong> 占位符替换成真实数据、填上姓名联系方式,再导出 PDF 投递。</p>
       <pre id="rewrite-content" class="rw-output" contenteditable="true" spellcheck="false"></pre>
       <div class="actions" style="margin-top:16px">
-        <button class="btn-primary" id="pdf-btn">📑 导出 PDF 简历</button>
+        <button class="btn-primary" id="pdf-one-btn">📄 导出 PDF 简历(一页纸)</button>
+        <button class="btn-ghost" id="pdf-btn">📑 导出 PDF 简历(不限页数)</button>
         <button class="btn-ghost" id="copy-btn">复制全文</button>
         <button class="btn-ghost" id="download-btn">下载 .md</button>
         <button class="btn-ghost" id="rewrite-back-btn">← 返回报告</button>
       </div>
-      <p class="hint" style="margin-top:10px">导出时会自动去掉“待你补充的信息”备注区;在弹出的打印窗口里选择“另存为 PDF / 保存为 PDF”即可。</p>
+      <p class="hint" style="margin-top:10px">一页纸版会自动压缩排版,把内容刚好放进一张 A4(应届生简历推荐);导出时会自动去掉“待你补充的信息”备注区,在弹出的打印窗口里选择“另存为 PDF”即可。</p>
     </div>
   </section>
 
@@ -771,7 +772,7 @@ function resumeMdToHtml(md) {
   return html;
 }
 
-$('pdf-btn').addEventListener('click', () => {
+function exportPdf(onePage) {
   const md = $('rewrite-content').textContent;
   const placeholders = (md.match(/\[X\]/g) || []).length;
   if (placeholders > 0 && !confirm(`简历里还有 ${placeholders} 个 [X] 数据占位符没有填写。\n建议先点击文本直接编辑补全,再导出。\n\n仍要继续导出吗?`)) {
@@ -779,30 +780,63 @@ $('pdf-btn').addEventListener('click', () => {
   }
   const w = window.open('', '_blank');
   if (!w) { alert('浏览器拦截了弹窗,请允许本站打开新窗口后重试。'); return; }
+
+  // 一页纸版:相对字号排版 + 自动缩放脚本,内容超出时逐步压缩直到装进一张 A4
+  const fitScript = onePage ? `
+  <script>
+    window.onload = () => {
+      const A4 = 1118; // 297mm 在 96dpi 下的像素高度(留少量余量)
+      let fs = 13;
+      document.body.style.fontSize = fs + 'px';
+      while (document.documentElement.scrollHeight > A4 && fs > 8.5) {
+        fs -= 0.25;
+        document.body.style.fontSize = fs + 'px';
+      }
+      if (document.documentElement.scrollHeight > A4) {
+        const b = document.createElement('div');
+        b.className = 'overflow-note';
+        b.textContent = '⚠ 内容较多,压缩到最小可读字号后仍超过一页。建议返回上一页删减内容,或改用"不限页数"导出。';
+        document.body.prepend(b);
+      }
+      window.__fitted = fs;
+      setTimeout(() => window.print(), 300);
+    };
+  <\/script>` : `
+  <script>window.onload=()=>{setTimeout(()=>window.print(),300)};<\/script>`;
+
+  const pagePadding = onePage ? '10mm 13mm' : '14mm 16mm';
   w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>简历</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-      color:#1a1a1a; line-height:1.65; font-size:13px;
-      max-width:210mm; margin:0 auto; padding:14mm 16mm;
+      color:#1a1a1a; line-height:${onePage ? '1.5' : '1.65'}; font-size:13px;
+      max-width:210mm; margin:0 auto; padding:${pagePadding};
     }
-    h1 { font-size:24px; text-align:center; margin-bottom:4px; letter-spacing:1px; }
+    h1 { font-size:1.8em; text-align:center; margin-bottom:0.2em; letter-spacing:1px; }
     h1 + p { text-align:center; color:#444; }
     h2 {
-      font-size:15px; margin:14px 0 6px; padding-bottom:4px;
+      font-size:1.14em; margin:${onePage ? '0.7em 0 0.3em' : '1em 0 0.45em'}; padding-bottom:0.25em;
       border-bottom:2px solid #2a78d6; color:#1c5cab;
     }
-    p { margin:4px 0; }
-    .lead { color:#444; font-style:normal; background:#f2f7fd; padding:8px 12px; border-radius:6px; margin:8px 0; }
-    ul { margin:4px 0 8px 18px; }
-    li { margin:3px 0; }
-    hr { border:none; border-top:1px solid #ddd; margin:10px 0; }
+    p { margin:0.3em 0; }
+    .lead { color:#444; background:#f2f7fd; padding:0.6em 0.9em; border-radius:6px; margin:0.6em 0; }
+    ul { margin:0.3em 0 0.6em 1.4em; }
+    li { margin:${onePage ? '0.15em' : '0.25em'} 0; }
+    hr { border:none; border-top:1px solid #ddd; margin:0.7em 0; }
+    .overflow-note {
+      position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      background:#d03b3b; color:#fff; padding:10px 20px; border-radius:8px;
+      font-size:14px; box-shadow:0 6px 20px rgba(0,0,0,0.25); z-index:9;
+    }
+    @media print { .overflow-note { display:none; } }
     @page { size: A4; margin: 0; }
-    @media print { body { padding:12mm 14mm; } }
-  </style></head><body>${resumeMdToHtml(md)}<script>window.onload=()=>{setTimeout(()=>window.print(),300)};<\/script></body></html>`);
+  </style></head><body>${resumeMdToHtml(md)}${fitScript}</body></html>`);
   w.document.close();
-});
+}
+
+$('pdf-one-btn').addEventListener('click', () => exportPdf(true));
+$('pdf-btn').addEventListener('click', () => exportPdf(false));
 
 $('download-btn').addEventListener('click', () => {
   const blob = new Blob([$('rewrite-content').textContent], { type: 'text/markdown;charset=utf-8' });
