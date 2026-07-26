@@ -61,6 +61,7 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .tagline { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
+  #auth-status a { color: var(--ink-3); }
 
   /* ---------- steps strip ---------- */
   .steps {
@@ -121,7 +122,6 @@
     font-size: 15px; font-family: inherit;
   }
   .txt:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
-  #auth-status a { color: var(--ink-3); }
   .field { margin-bottom: 16px; }
   .field label { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
   .field label .opt { font-weight: 400; color: var(--ink-3); font-size: 12px; margin-left: auto; }
@@ -331,10 +331,23 @@
     </div>
 
     <div class="report-actions">
-      <button class="btn-primary" id="rewrite-btn">✨ 一键生成修改版简历</button>
+      <button class="btn-primary" id="poster-btn">🖼 生成我的诊断海报</button>
+      <button class="btn-ghost" id="rewrite-btn">✨ 一键生成修改版简历</button>
       <button class="btn-ghost" id="back-btn">← 返回修改后再测一次</button>
     </div>
   </section>
+
+  <!-- ============ 海报弹窗 ============ -->
+  <div id="poster-modal" style="display:none;position:fixed;inset:0;background:rgba(11,11,11,0.55);z-index:50;overflow-y:auto;padding:24px 16px">
+    <div style="max-width:420px;margin:0 auto;background:var(--surface);border-radius:16px;padding:18px;text-align:center">
+      <p class="hint" style="margin-bottom:10px">手机长按图片保存,或点下方按钮下载 → 分享到朋友圈 / 小红书</p>
+      <img id="poster-img" alt="诊断海报" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+      <div class="actions" style="margin-top:14px;justify-content:center">
+        <button class="btn-primary" id="poster-download">下载海报</button>
+        <button class="btn-ghost" id="poster-close">关闭</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ============ 邮箱登录 ============ -->
   <section id="login-view" style="display:none">
@@ -458,8 +471,11 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+let lastReport = null;
+
 /* ================= 渲染报告 ================= */
 function renderReport(data) {
+  lastReport = data;
   $('input-panel').style.display = 'none';
   $('loading').style.display = 'none';
   $('rewrite-view').style.display = 'none';
@@ -571,7 +587,7 @@ async function extractPdfText(file) {
   return text.replace(/\n{3,}/g, '\n\n').trim();
 }
 
-/** 图片压缩到适合上传的尺寸,返回 dataURL */
+/* ================= 图片识别(视觉模型 OCR) ================= */
 function compressImage(file, maxSide = 1600, quality = 0.85) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -626,7 +642,6 @@ function bindFileUpload(btnId, inputId, taId, countId) {
     } catch (err) {
       btn.textContent = origText;
       if (err.needLogin) {
-        // 图片识别需要登录:登录成功后自动重新识别这个文件
         requireLogin(() => processFile(file), 'input-panel');
       } else {
         showError(err.message || '解析失败,请手动粘贴文本。');
@@ -641,7 +656,6 @@ function bindFileUpload(btnId, inputId, taId, countId) {
     input.value = '';
     if (!file) return;
     if (file.type.startsWith('image/') && !authToken) {
-      // 提前引导登录,登录完自动继续识别
       requireLogin(() => processFile(file), 'input-panel');
       return;
     }
@@ -727,7 +741,6 @@ $('copy-btn').addEventListener('click', async () => {
     await navigator.clipboard.writeText($('rewrite-content').textContent);
     $('copy-btn').textContent = '✓ 已复制';
   } catch {
-    // 剪贴板 API 不可用时的兜底
     const r = document.createRange();
     r.selectNodeContents($('rewrite-content'));
     const sel = window.getSelection();
@@ -847,14 +860,168 @@ $('download-btn').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
 });
 
-/* ================= 事件 ================= */
-$('demo-btn').addEventListener('click', () => { lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
+/* ================= 诊断海报(Canvas 生成,含二维码) ================= */
+const QR_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAV4AAAFeCAIAAABCSeBNAAAGWklEQVR4nO3dMY5jNxBAQY8xoc/ho/jQPorP4VyODTx8LMDlNilV5aMvjYQHBo3m1+v1+g3g/36ffgPAiaQBCNIABGkAgjQAQRqAIA1AkAYgSAMQpAEI0gAEaQCCNABBGoAgDUCQBiBIAxCkAQjSAARpAII0AEEagCANQJAGIEgDEKQBCNIABGkAgjQA4XvfS//x51/7XnzEv//8vemVn/9XK8/d9y08v6upT7Tyrm607zfp1AAEaQCCNABBGoAgDUCQBiBIAxCkAQjSAISN05DP9k1xrViZlrtx0m5ldvDMeccV7/ebXOHUAARpAII0AEEagCANQJAGIEgDEKQBCNIAhLFpyGdTGw3PfOVn77cr8dOmEs/8vE4NQJAGIEgDEKQBCNIABGkAgjQAQRqAIA1AOHQa8kYr03JTt04/2zdJ+WmThTdyagCCNABBGoAgDUCQBiBIAxCkAQjSAARpAIJpyJ9m3+zg1KzkvnnHqXfFj3NqAII0AEEagCANQJAGIEgDEKQBCNIABGkAwqHTkDdu+Jua0rvxLuwz39WzG3+TK5wagCANQJAGIEgDEKQBCNIABGkAgjQAQRqAMDYNeeM83Ip9+x397c/yab/JZ04NQJAGIEgDEKQBCNIABGkAgjQAQRqAIA1A+Hq9XtPv4SPsuzl65blTpu7+5sc5NQBBGoAgDUCQBiBIAxCkAQjSAARpAII0AGHjbsj3m8ObsjIdeOZ+xxUr39GZ/40zpz+dGoAgDUCQBiBIAxCkAQjSAARpAII0AEEagDC2G3Lf3OHU9NiZM21nzneeud/xxm9w37tyagCCNABBGoAgDUCQBiBIAxCkAQjSAARpAMLGacgbt+VNzWie+dwbv6Mz/883cmoAgjQAQRqAIA1AkAYgSAMQpAEI0gAEaQDC2G7IFfvuSn4/+2YWz5wsfL8ZTTdlAweRBiBIAxCkAQjSAARpAII0AEEagCANQDh0GvLMmbZnN24lvPH/vM+N3+A+Tg1AkAYgSAMQpAEI0gAEaQCCNABBGoAgDUC48qbsFWduB9znzLnDZ2duUvy05zo1AEEagCANQJAGIEgDEKQBCNIABGkAgjQAYWw35NSs5JmTds/OvIV5amL1xvnOZ3ZDAteQBiBIAxCkAQjSAARpAII0AEEagCANQLhyGnLque83h/ds6g7uM2dS9znz8zo1AEEagCANQJAGIEgDEKQBCNIABGkAgjQA4XvqwVNbCT9tk+Iz+x1/jTPnHZ85NQBBGoAgDUCQBiBIAxCkAQjSAARpAII0AGHjbsgzJwvPnB189n6ThVNbJ1de+dmZ20xXODUAQRqAIA1AkAYgSAMQpAEI0gAEaQCCNABhbDfkijMnGs/c8HfmJOWZ96SfyU3ZwEGkAQjSAARpAII0AEEagCANQJAGIEgDEK6chlxx5iTlynTg1LTc1J3j73fX+Zn3aDs1AEEagCANQJAGIEgDEKQBCNIABGkAgjQA4cqbsvc998a7sKdunb5x7vD9uCkb+KWkAQjSAARpAII0AEEagCANQJAGIEgDEDZOQ36aMzf8Td0MPjWTeuYt2zd+XqcGIEgDEKQBCNIABGkAgjQAQRqAIA1AkAYgjO2GvNGNM23PztyjOTVneebnneLUAARpAII0AEEagCANQJAGIEgDEKQBCNIAhO+pB585AXbmROOZ91mbO3xvTg1AkAYgSAMQpAEI0gAEaQCCNABBGoAgDUAYm4Z8duM83NQk5dQN3WfuaJzaSDo137mPUwMQpAEI0gAEaQCCNABBGoAgDUCQBiBIAxAOnYb8NPsmGqfm8KZ2Q545hTm1v3OFUwMQpAEI0gAEaQCCNABBGoAgDUCQBiBIAxBMQ765qa2TU7ODz6ZuBrcbEngT0gAEaQCCNABBGoAgDUCQBiBIAxCkAQiHTkNO7cPb58YbuvfNDj6b2pT5fr+6FU4NQJAGIEgDEKQBCNIABGkAgjQAQRqAIA1AGJuGvHFb3pQzpwOn9juuOPPO8TOnMJ0agCANQJAGIEgDEKQBCNIABGkAgjQAQRqA8PV6vabfA3AcpwYgSAMQpAEI0gAEaQCCNABBGoAgDUCQBiBIAxCkAQjSAARpAII0AEEagCANQJAGIEgDEKQBCNIABGkAgjQAQRqAIA1AkAYgSAMQpAEI0gAEaQDCf3DeMMWSZw1LAAAAAElFTkSuQmCC';
 
-$('back-btn').addEventListener('click', () => {
-  $('report').style.display = 'none';
-  $('rewrite-view').style.display = 'none';
-  $('input-panel').style.display = 'block';
-  window.scrollTo({ top: 0 });
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, maxWidth, maxLines) {
+  const lines = [];
+  let cur = '';
+  for (const ch of text) {
+    if (ctx.measureText(cur + ch).width > maxWidth) {
+      lines.push(cur); cur = ch;
+      if (lines.length === maxLines) break;
+    } else cur += ch;
+  }
+  if (lines.length < maxLines && cur) lines.push(cur);
+  else if (lines.length === maxLines && cur) lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
+  return lines;
+}
+
+async function buildPoster() {
+  const d = lastReport;
+  if (!d) return null;
+  const S = 2, W = 750 * S, H = 1250 * S;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const FONT = 'system-ui, "PingFang SC", "Microsoft YaHei", sans-serif';
+  const NAVY = '#0b2545', ACCENT = '#2a78d6', GRAY = '#52514e', LIGHT = '#898781';
+
+  // 背景
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#eef4fd'); bg.addColorStop(1, '#dce8f8');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(42,120,214,0.08)';
+  ctx.beginPath(); ctx.arc(W - 60 * S, 90 * S, 140 * S, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(40 * S, H - 120 * S, 110 * S, 0, 7); ctx.fill();
+
+  // 标题
+  ctx.textAlign = 'center';
+  ctx.fillStyle = NAVY;
+  ctx.font = `800 ${44 * S}px ${FONT}`;
+  ctx.fillText('简历医生 +', W / 2, 86 * S);
+  ctx.fillStyle = GRAY;
+  ctx.font = `${22 * S}px ${FONT}`;
+  const today = new Date();
+  ctx.fillText(`我的 AI 简历诊断报告 · ${today.getMonth() + 1} 月 ${today.getDate()} 日`, W / 2, 124 * S);
+
+  // 主卡片
+  ctx.save();
+  ctx.shadowColor = 'rgba(42,120,214,0.28)'; ctx.shadowBlur = 30 * S; ctx.shadowOffsetY = 10 * S;
+  ctx.fillStyle = '#ffffff';
+  rrect(ctx, 40 * S, 156 * S, 670 * S, 660 * S, 26 * S); ctx.fill();
+  ctx.restore();
+
+  // 分数
+  ctx.fillStyle = GRAY; ctx.font = `${24 * S}px ${FONT}`;
+  ctx.fillText('综合匹配度', W / 2, 226 * S);
+  ctx.fillStyle = NAVY; ctx.font = `800 ${128 * S}px ${FONT}`;
+  ctx.fillText(String(d.score), W / 2 - 30 * S, 356 * S);
+  ctx.fillStyle = LIGHT; ctx.font = `${28 * S}px ${FONT}`;
+  const sw = ctx.measureText(String(d.score)).width;
+  ctx.textAlign = 'left';
+  ctx.fillText('/100', W / 2 + 40 * S, 356 * S);
+  ctx.textAlign = 'center';
+
+  // 评级胶囊
+  const bandInfo = d.score >= 80 ? ['✓ 可直接投递', '#0ca30c', 'rgba(12,163,12,0.12)']
+    : d.score >= 65 ? ['△ 小幅打磨后投递', '#8a6200', 'rgba(250,178,25,0.18)']
+    : d.score >= 45 ? ['⚠ 建议优化后再投', '#c05621', 'rgba(236,131,90,0.18)']
+    : ['✕ 需要大幅修改', '#d03b3b', 'rgba(208,59,59,0.12)'];
+  ctx.font = `700 ${26 * S}px ${FONT}`;
+  const bw = ctx.measureText(bandInfo[0]).width + 56 * S;
+  ctx.fillStyle = bandInfo[2];
+  rrect(ctx, (W - bw) / 2, 388 * S, bw, 52 * S, 26 * S); ctx.fill();
+  ctx.fillStyle = bandInfo[1];
+  ctx.fillText(bandInfo[0], W / 2, 424 * S);
+
+  // 五维评分条
+  const dims = d.dimensions || [];
+  let dy = 496 * S;
+  ctx.textAlign = 'left';
+  for (const dim of dims) {
+    ctx.fillStyle = GRAY; ctx.font = `${22 * S}px ${FONT}`;
+    ctx.fillText(dim.name, 84 * S, dy + 8 * S);
+    const bx = 236 * S, bwidth = 330 * S;
+    ctx.fillStyle = '#dce8f8';
+    rrect(ctx, bx, dy - 10 * S, bwidth, 20 * S, 10 * S); ctx.fill();
+    ctx.fillStyle = ACCENT;
+    const fw = Math.max(0.04, Math.min(1, dim.score / 100)) * bwidth;
+    rrect(ctx, bx, dy - 10 * S, fw, 20 * S, 10 * S); ctx.fill();
+    ctx.fillStyle = NAVY; ctx.font = `700 ${24 * S}px ${FONT}`;
+    ctx.fillText(String(dim.score), bx + bwidth + 24 * S, dy + 9 * S);
+    dy += 54 * S;
+  }
+
+  // 总评(截断 3 行)
+  ctx.fillStyle = GRAY; ctx.font = `${20 * S}px ${FONT}`;
+  const vlines = wrapText(ctx, d.verdict || '', 600 * S, 3);
+  let vy = dy + 26 * S;
+  for (const line of vlines) { ctx.fillText(line, 78 * S, vy); vy += 32 * S; }
+
+  // 底部二维码卡片
+  ctx.save();
+  ctx.shadowColor = 'rgba(42,120,214,0.25)'; ctx.shadowBlur = 26 * S; ctx.shadowOffsetY = 8 * S;
+  ctx.fillStyle = '#ffffff';
+  rrect(ctx, 40 * S, 852 * S, 670 * S, 300 * S, 26 * S); ctx.fill();
+  ctx.restore();
+
+  const qr = new Image();
+  await new Promise((res, rej) => { qr.onload = res; qr.onerror = rej; qr.src = 'data:image/png;base64,' + QR_B64; });
+  ctx.drawImage(qr, 76 * S, 884 * S, 236 * S, 236 * S);
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = NAVY; ctx.font = `800 ${34 * S}px ${FONT}`;
+  ctx.fillText('扫码免费诊断你的简历', 344 * S, 948 * S);
+  ctx.fillStyle = GRAY; ctx.font = `${22 * S}px ${FONT}`;
+  ctx.fillText('30 秒生成报告 · 一键改简历', 344 * S, 994 * S);
+  ctx.fillText('无广告 · 不存储简历内容', 344 * S, 1030 * S);
+  ctx.fillStyle = ACCENT; ctx.font = `700 ${24 * S}px ${FONT}`;
+  ctx.fillText('520resume-doctor.online', 344 * S, 1080 * S);
+
+  // 页脚
+  ctx.textAlign = 'center';
+  ctx.fillStyle = LIGHT; ctx.font = `${20 * S}px ${FONT}`;
+  ctx.fillText('AI 帮你找出简历的"病",别再无效海投了', W / 2, 1204 * S);
+
+  return cv.toDataURL('image/png');
+}
+
+$('poster-btn').addEventListener('click', async () => {
+  const btn = $('poster-btn');
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '生成中…';
+  try {
+    const url = await buildPoster();
+    if (!url) throw new Error('请先完成一次诊断');
+    $('poster-img').src = url;
+    $('poster-modal').style.display = 'block';
+  } catch (e) {
+    alert(e.message || '海报生成失败,请重试。');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+});
+
+$('poster-close').addEventListener('click', () => { $('poster-modal').style.display = 'none'; });
+$('poster-modal').addEventListener('click', (e) => { if (e.target === $('poster-modal')) $('poster-modal').style.display = 'none'; });
+$('poster-download').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = $('poster-img').src;
+  a.download = '我的简历诊断海报.png';
+  a.click();
 });
 
 /* ================= 登录态管理 ================= */
@@ -1010,6 +1177,16 @@ $('analyze-btn').addEventListener('click', () => {
 });
 
 renderAuthStatus();
+
+/* ================= 事件 ================= */
+$('demo-btn').addEventListener('click', () => { lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
+
+$('back-btn').addEventListener('click', () => {
+  $('report').style.display = 'none';
+  $('rewrite-view').style.display = 'none';
+  $('input-panel').style.display = 'block';
+  window.scrollTo({ top: 0 });
+});
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
