@@ -44,27 +44,60 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: var(--page);
+    background:
+      radial-gradient(1200px 500px at 50% -100px, rgba(42,120,214,0.10), transparent 70%),
+      var(--page);
     color: var(--ink-1);
     line-height: 1.6;
+    min-height: 100vh;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
 
   /* ---------- header ---------- */
-  header { text-align: center; margin-bottom: 28px; }
-  .logo { font-size: 28px; font-weight: 700; letter-spacing: 0.5px; }
-  .logo .plus { color: var(--accent); }
-  .tagline { color: var(--ink-2); margin-top: 6px; font-size: 15px; }
+  header { text-align: center; margin-bottom: 30px; }
+  .logo { font-size: 34px; font-weight: 800; letter-spacing: 0.5px; }
+  .logo .plus {
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .tagline { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
+
+  /* ---------- steps strip ---------- */
+  .steps {
+    display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
+    margin: 18px 0 26px; font-size: 13px; color: var(--ink-2);
+  }
+  .step {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 14px;
+  }
+  .step b {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+  }
+  .step-arrow { color: var(--ink-3); align-self: center; }
 
   /* ---------- cards ---------- */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 16px;
+    border-radius: 16px;
+    padding: 26px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(11,11,11,0.04), 0 10px 30px -12px rgba(42,120,214,0.12);
+    animation: rise 0.45s ease both;
   }
-  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .card h2 {
+    font-size: 16px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h2::before {
+    content: ""; width: 4px; height: 16px; border-radius: 2px;
+    background: linear-gradient(180deg, var(--accent), #7c5cff);
+  }
   .hint { font-size: 13px; color: var(--ink-3); }
 
   /* ---------- inputs ---------- */
@@ -111,10 +144,15 @@
     cursor: pointer;
     border: 1px solid transparent;
   }
-  .btn-primary { background: var(--accent); color: #fff; font-weight: 600; }
-  .btn-primary:hover { filter: brightness(1.06); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-ghost { background: transparent; color: var(--ink-2); border-color: var(--hairline); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #1c5cab);
+    color: #fff; font-weight: 600;
+    box-shadow: 0 4px 14px -4px rgba(42,120,214,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -6px rgba(42,120,214,0.55); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-ghost { background: var(--surface); color: var(--ink-2); border-color: var(--hairline); transition: background 0.15s ease; }
   .btn-ghost:hover { background: var(--page); }
   .privacy { font-size: 12px; color: var(--ink-3); margin-top: 12px; }
 
@@ -219,23 +257,30 @@
 
   <!-- ============ 输入区 ============ -->
   <section id="input-panel">
+    <div class="steps">
+      <span class="step"><b>1</b> 粘贴/上传简历</span>
+      <span class="step-arrow">→</span>
+      <span class="step"><b>2</b> 30 秒 AI 诊断</span>
+      <span class="step-arrow">→</span>
+      <span class="step"><b>3</b> 一键生成修改版</span>
+    </div>
     <div class="card">
       <div class="field">
         <label>简历内容
-          <button class="btn-mini" id="resume-pdf-btn" type="button">📄 上传 PDF</button>
+          <button class="btn-mini" id="resume-pdf-btn" type="button">📄 上传 PDF / 图片</button>
           <span class="opt">建议先删除手机号、住址等隐私信息</span>
         </label>
-        <input type="file" id="resume-pdf" accept=".pdf,application/pdf" style="display:none">
-        <textarea id="resume" placeholder="把简历全文粘贴到这里,或点击上方“上传 PDF”自动读取……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
+        <input type="file" id="resume-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
+        <textarea id="resume" placeholder="把简历全文粘贴到这里,或点击上方“上传 PDF / 图片”自动读取……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
         <div class="counter"><span id="resume-count">0</span> / 8000</div>
       </div>
       <div class="field">
         <label>目标岗位 JD
-          <button class="btn-mini" id="jd-pdf-btn" type="button">📄 上传 PDF</button>
+          <button class="btn-mini" id="jd-pdf-btn" type="button">📄 上传 PDF / 图片</button>
           <span class="opt">选填 — 不填则做通用体检</span>
         </label>
-        <input type="file" id="jd-pdf" accept=".pdf,application/pdf" style="display:none">
-        <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,诊断会针对这个岗位计算匹配度……"></textarea>
+        <input type="file" id="jd-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
+        <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,或上传 JD 截图自动识别……"></textarea>
         <div class="counter"><span id="jd-count">0</span> / 8000</div>
       </div>
       <div class="actions">
@@ -523,36 +568,85 @@ async function extractPdfText(file) {
   return text.replace(/\n{3,}/g, '\n\n').trim();
 }
 
-function bindPdfUpload(btnId, inputId, taId, countId) {
+/** 图片压缩到适合上传的尺寸,返回 dataURL */
+function compressImage(file, maxSide = 1600, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(img.src);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('图片读取失败,请换一张图片。'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function extractImageText(file) {
+  const dataUrl = await compressImage(file);
+  const resp = await fetch('/api/extract', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ image: dataUrl })
+  });
+  const data = await resp.json();
+  if (resp.status === 401) { const e = new Error(data.error || '请先登录'); e.needLogin = true; throw e; }
+  if (!resp.ok) throw new Error(data.error || '图片识别失败。');
+  return data.text;
+}
+
+function bindFileUpload(btnId, inputId, taId, countId) {
   const btn = $(btnId), input = $(inputId), ta = $(taId);
   btn.addEventListener('click', () => input.click());
-  input.addEventListener('change', async () => {
-    const file = input.files[0];
-    if (!file) return;
+
+  async function processFile(file) {
     $('error').style.display = 'none';
     btn.disabled = true;
     const origText = btn.textContent;
-    btn.textContent = '解析中…';
+    const isImage = file.type.startsWith('image/');
+    btn.textContent = isImage ? '识别中…约 15 秒' : '解析中…';
     try {
-      const text = await extractPdfText(file);
-      if (!text || text.length < 30) {
-        throw new Error('这份 PDF 提取不到文字,可能是扫描件/图片版。请改用文字版 PDF,或手动粘贴文本。');
+      const text = isImage ? await extractImageText(file) : await extractPdfText(file);
+      if (!text || text.length < 20) {
+        throw new Error(isImage
+          ? '图片里识别不到足够的文字,请换更清晰的图片或手动粘贴。'
+          : '这份 PDF 提取不到文字,可能是扫描件/图片版。可以改传图片(拍照/截图),或手动粘贴文本。');
       }
       ta.value = text.slice(0, MAX_LEN);
       $(countId).textContent = ta.value.length;
       btn.textContent = '✓ 已读取';
       setTimeout(() => { btn.textContent = origText; }, 2500);
     } catch (err) {
-      showError(err.message || 'PDF 解析失败,请手动粘贴文本。');
       btn.textContent = origText;
+      if (err.needLogin) {
+        // 图片识别需要登录:登录成功后自动重新识别这个文件
+        requireLogin(() => processFile(file), 'input-panel');
+      } else {
+        showError(err.message || '解析失败,请手动粘贴文本。');
+      }
     } finally {
       btn.disabled = false;
-      input.value = '';
     }
+  }
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    input.value = '';
+    if (!file) return;
+    if (file.type.startsWith('image/') && !authToken) {
+      // 提前引导登录,登录完自动继续识别
+      requireLogin(() => processFile(file), 'input-panel');
+      return;
+    }
+    processFile(file);
   });
 }
-bindPdfUpload('resume-pdf-btn', 'resume-pdf', 'resume', 'resume-count');
-bindPdfUpload('jd-pdf-btn', 'jd-pdf', 'jd', 'jd-count');
+bindFileUpload('resume-pdf-btn', 'resume-pdf', 'resume', 'resume-count');
+bindFileUpload('jd-pdf-btn', 'jd-pdf', 'jd', 'jd-count');
 
 /* ================= 一键生成修改版简历 ================= */
 let lastInput = { resume: '', jd: '' };
