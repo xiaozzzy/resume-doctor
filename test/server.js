@@ -1,96 +1,123 @@
-// 本地测试服务器:静态托管 index.html + 模拟 /api/analyze
-// 用法: node test/server.js  → http://localhost:3000
+// 本地测试服务器:静态文件 + 模拟 API(不调用真实模型/Redis/邮件)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+const PORT = 3000;
 
 const MOCK_REPORT = {
   score: 72,
-  verdict: '简历整体质量不错,经历有一定量化,但与目标岗位的 AI 相关关键词覆盖不足,小幅打磨后即可投递。',
+  verdict: '简历整体结构清晰,但量化成果不足是最大短板。建议围绕目标JD补充3-5个带数字的成果描述,匹配度可提升至85分以上再投递。',
   dimensions: [
-    { name: '岗位匹配度', score: 68, comment: 'JD 要求的 Prompt 设计经验未在简历中体现。' },
-    { name: '量化程度', score: 75, comment: '多数经历有数字,但缺少对比基线。' },
-    { name: '表达质量', score: 80, comment: '动作动词使用得当,个别句子偏长。' },
-    { name: '结构完整度', score: 82, comment: '结构清晰,建议增加个人定位一句话。' },
-    { name: '关键词覆盖', score: 60, comment: '命中 6/10,缺 RAG、Agent 等核心词。' }
+    { name: '岗位匹配度', score: 70, comment: '核心关键词覆盖一般,缺少数据分析相关表述' },
+    { name: '成果量化', score: 55, comment: '多数经历缺少数字支撑' },
+    { name: '关键词覆盖', score: 75, comment: '覆盖了产品设计、需求分析等词' },
+    { name: '结构与排版', score: 85, comment: '结构清晰,模块完整' },
+    { name: '语言表达', score: 75, comment: '表达尚可,部分句子偏口语化' },
   ],
-  missing_keywords: ['Prompt 工程', 'RAG', 'Agent', '用户调研'],
+  missing_keywords: ['SQL', 'A/B 测试', '数据埋点', '用户画像'],
   issues: [
-    { severity: 'high', title: '缺少与 AI 产品直接相关的经历描述', quote: '负责产品的日常运营工作。', suggestion: '把使用 AI 工具完成的具体工作单独提炼成一条经历。' },
-    { severity: 'medium', title: '部分成果缺少对比基线', quote: '将转化率提升至 5%。', suggestion: '补充提升前的数字,如"从 2% 提升至 5%"。' },
-    { severity: 'low', title: '技能罗列过于笼统', quote: '熟悉各类办公软件。', suggestion: '替换为具体工具名 + 熟练度。' }
+    { severity: 'high', title: '缺少量化成果', quote: '负责公司产品的日常运营工作', suggestion: '补充具体数据,如用户量、增长率、转化率' },
+    { severity: 'medium', title: '技能描述与JD不匹配', quote: '熟悉办公软件', suggestion: 'JD要求数据分析能力,应突出SQL/Excel建模等技能' },
+    { severity: 'low', title: '自我评价空泛', quote: '工作认真负责,有责任心', suggestion: '用具体事例替代形容词' },
   ],
   rewrites: [
-    { before: '负责产品的日常运营工作。', after: '独立负责 X 产品运营,搭建数据看板监控 5 项核心指标,月活从 X 提升至 X(+40%)。', why: '补齐了动作和可验证结果,请把 X 替换为真实数字。' }
-  ]
+    { before: '负责公司产品的日常运营工作', after: '负责XX产品日常运营,3个月内将DAU从1.2万提升至2.5万(+108%)', why: '把职责改成带数字的成果,让HR一眼看到你的价值' },
+    { before: '熟悉办公软件', after: '熟练使用SQL与Excel透视表完成用户行为分析,支撑3次产品迭代决策', why: '对齐JD要求的数据分析能力,具体到工具和产出' },
+  ],
 };
 
-const MOCK_REWRITE = `# [姓名]\n\n**求职意向:AI 产品运营 | [电话] | [邮箱]**\n\n## 实习经历\n**某互联网公司 · 运营实习生**(2025.3 – 2025.6)\n- 独立运营公众号 [X] 个月,平均阅读量从 [X] 提升至 [X]\n\n---\n\n📝 待你补充的信息:\n1. 公众号运营数据`;
+const MOCK_REWRITE = `# 张三
+📱 138-XXXX-XXXX | ✉️ zhangsan@example.com | 求职意向:产品经理
 
-http.createServer((req, res) => {
-  if (req.url === '/api/extract' && req.method === 'POST') {
-    let body = '';
-    req.on('data', c => body += c); req.on('end', () => {
-      setTimeout(() => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ text: '张三\n教育背景: 某大学 市场营销专业 2022-2026\n实习经历: 某互联网公司 运营实习生\n负责公众号的日常内容运营,提升了粉丝数量和阅读量。\n技能: 熟练使用 Office 办公软件。' }));
-      }, 500);
-    });
+## 个人简介
+3年互联网产品运营经验,擅长数据驱动增长,曾主导DAU翻倍项目。
+
+## 工作经历
+**XX科技有限公司 | 产品运营 | 2023.06 - 至今**
+- 负责XX产品日常运营,3个月内将DAU从1.2万提升至2.5万(+108%)
+- 熟练使用SQL与Excel透视表完成用户行为分析,支撑3次产品迭代决策
+- 搭建用户反馈闭环机制,需求响应周期从7天缩短至2天
+
+## 教育背景
+**XX大学 | 本科 | 市场营销 | 2019 - 2023**
+
+## 技能
+SQL / Excel建模 / Axure / 墨刀 / 数据埋点分析
+
+## 待你补充
+- [X] 请补充最近一段实习/项目的具体数据
+- [X] 请确认求职意向城市`;
+
+const MOCK_EXTRACT = `张三
+电话:138-XXXX-XXXX 邮箱:zhangsan@example.com
+求职意向:产品经理
+工作经历:
+XX科技有限公司 产品运营 2023.06-至今
+负责公司产品的日常运营工作,熟悉办公软件。
+教育背景:XX大学 本科 市场营销 2019-2023
+自我评价:工作认真负责,有责任心。`;
+
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
+
+function json(res, code, obj) {
+  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(obj));
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', (c) => (data += c));
+    req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { resolve({}); } });
+  });
+}
+
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, 'http://localhost');
+  const p = url.pathname;
+
+  if (p === '/api/analyze' && req.method === 'POST') {
+    await readBody(req);
+    setTimeout(() => json(res, 200, MOCK_REPORT), 800);
     return;
   }
-  if (req.url === '/api/auth-send-code' && req.method === 'POST') {
-    req.on('data', () => {}); req.on('end', () => {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true })); // 本地测试固定验证码 123456
-    });
+  if (p === '/api/rewrite' && req.method === 'POST') {
+    await readBody(req);
+    setTimeout(() => json(res, 200, { content: MOCK_REWRITE }), 800);
     return;
   }
-  if (req.url === '/api/auth-verify' && req.method === 'POST') {
-    let body = '';
-    req.on('data', c => body += c); req.on('end', () => {
-      const { email, code } = JSON.parse(body || '{}');
-      res.writeHead(code === '123456' ? 200 : 400, { 'Content-Type': 'application/json' });
-      res.end(code === '123456'
-        ? JSON.stringify({ token: 'test-token-0123456789abcdef', email })
-        : JSON.stringify({ error: '验证码错误或已过期。' }));
-    });
+  if (p === '/api/extract' && req.method === 'POST') {
+    await readBody(req);
+    setTimeout(() => json(res, 200, { text: MOCK_EXTRACT }), 500);
     return;
   }
-  if (req.url === '/api/stats') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ users: 12, analyses: 34, rewrites: 8 }));
+  if (p === '/api/auth-send-code' && req.method === 'POST') {
+    const b = await readBody(req);
+    console.log('[mock] send code 123456 to', b.email);
+    json(res, 200, { ok: true });
     return;
   }
-  if (req.url === '/api/rewrite' && req.method === 'POST') {
-    let body = '';
-    req.on('data', c => body += c);
-    req.on('end', () => {
-      setTimeout(() => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ content: MOCK_REWRITE }));
-      }, 600);
-    });
+  if (p === '/api/auth-verify' && req.method === 'POST') {
+    const b = await readBody(req);
+    if (b.code === '123456') json(res, 200, { token: 'test-token-0123456789abcdef', email: b.email });
+    else json(res, 400, { error: '验证码错误' });
     return;
   }
-  if (req.url === '/api/analyze' && req.method === 'POST') {
-    let body = '';
-    req.on('data', c => body += c);
-    req.on('end', () => {
-      setTimeout(() => {  // 模拟模型延迟
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(MOCK_REPORT));
-      }, 800);
-    });
+  if (p === '/api/stats') {
+    json(res, 200, { users: 12, analyses: 34, rewrites: 8 });
     return;
   }
-  const file = req.url === '/' ? '/index.html' : req.url;
-  const fp = path.join(ROOT, file.split('?')[0]);
-  if (fp.startsWith(ROOT) && fs.existsSync(fp) && fs.statSync(fp).isFile()) {
-    res.writeHead(200, { 'Content-Type': fp.endsWith('.html') ? 'text/html; charset=utf-8' : 'application/octet-stream' });
-    res.end(fs.readFileSync(fp));
-  } else {
-    res.writeHead(404); res.end('not found');
-  }
-}).listen(3000, () => console.log('test server on http://localhost:3000'));
+
+  // 静态文件
+  let file = p === '/' ? '/index.html' : p;
+  const full = path.join(ROOT, path.normalize(file).replace(/^(\.\.[/\\])+/, ''));
+  fs.readFile(full, (err, data) => {
+    if (err) { res.writeHead(404); res.end('Not Found'); return; }
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(full)] || 'application/octet-stream' });
+    res.end(data);
+  });
+});
+
+server.listen(PORT, () => console.log(`test server on http://localhost:${PORT}`));
