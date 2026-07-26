@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>简历医生 Resume Doctor — AI 简历诊断</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink-1: #0b0b0b;
+    --ink-2: #52514e;
+    --ink-3: #898781;
+    --hairline: #e1e0d9;
+    --border: rgba(11,11,11,0.10);
+    --accent: #2a78d6;
+    --accent-track: #cde2fb;
+    --good: #0ca30c;
+    --good-text: #006300;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #d03b3b;
+    --tint-good: rgba(12,163,12,0.10);
+    --tint-warning: rgba(250,178,25,0.14);
+    --tint-serious: rgba(236,131,90,0.14);
+    --tint-critical: rgba(208,59,59,0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --ink-1: #ffffff;
+      --ink-2: #c3c2b7;
+      --ink-3: #898781;
+      --hairline: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --accent: #3987e5;
+      --accent-track: #184f95;
+      --good-text: #0ca30c;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--page);
+    color: var(--ink-1);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  /* ---------- header ---------- */
+  header { text-align: center; margin-bottom: 28px; }
+  .logo { font-size: 28px; font-weight: 700; letter-spacing: 0.5px; }
+  .logo .plus { color: var(--accent); }
+  .tagline { color: var(--ink-2); margin-top: 6px; font-size: 15px; }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .hint { font-size: 13px; color: var(--ink-3); }
+
+  /* ---------- inputs ---------- */
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--page);
+    color: var(--ink-1);
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.7;
+    resize: vertical;
+  }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  .field { margin-bottom: 16px; }
+  .field label { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .field label .opt { font-weight: 400; color: var(--ink-3); font-size: 12px; }
+  .counter { font-size: 12px; color: var(--ink-3); text-align: right; margin-top: 4px; }
+  .counter.over { color: var(--critical); }
+
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  button {
+    font-family: inherit;
+    font-size: 15px;
+    border-radius: 8px;
+    padding: 10px 22px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 600; }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink-2); border-color: var(--hairline); }
+  .btn-ghost:hover { background: var(--page); }
+  .privacy { font-size: 12px; color: var(--ink-3); margin-top: 12px; }
+
+  /* ---------- loading ---------- */
+  #loading { display: none; text-align: center; padding: 40px 0; }
+  .spinner {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid var(--accent-track); border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { color: var(--ink-2); font-size: 14px; }
+
+  #error {
+    display: none;
+    background: var(--tint-critical);
+    border: 1px solid var(--critical);
+    color: var(--ink-1);
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;
+  }
+
+  /* ---------- report: hero ---------- */
+  #report { display: none; }
+  .hero { text-align: center; padding: 32px 24px; }
+  .hero-label { font-size: 14px; color: var(--ink-2); }
+  .hero-value { font-size: 56px; font-weight: 600; line-height: 1.2; }
+  .hero-value .outof { font-size: 20px; color: var(--ink-3); font-weight: 400; }
+  .meter {
+    height: 8px; border-radius: 4px; background: var(--accent-track);
+    max-width: 320px; margin: 14px auto 10px; overflow: hidden; position: relative;
+  }
+  .meter-fill { height: 100%; border-radius: 4px 4px 4px 4px; width: 0; transition: width 0.8s ease; }
+  .band {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; border-radius: 999px; padding: 3px 12px;
+  }
+  .verdict { color: var(--ink-2); font-size: 15px; max-width: 560px; margin: 14px auto 0; }
+
+  /* ---------- report: dimensions ---------- */
+  .dim-row { display: grid; grid-template-columns: 96px 1fr 40px; gap: 12px; align-items: center; padding: 9px 0; }
+  .dim-name { font-size: 14px; color: var(--ink-2); }
+  .dim-track { height: 12px; background: var(--accent-track); border-radius: 4px; overflow: hidden; }
+  .dim-fill { height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; width: 0; transition: width 0.8s ease; }
+  .dim-score { font-size: 14px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .dim-comment { grid-column: 1 / -1; font-size: 13px; color: var(--ink-3); margin-top: -4px; padding-bottom: 4px; }
+
+  /* ---------- report: keywords ---------- */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 13px; padding: 4px 12px; border-radius: 999px;
+    background: var(--page); border: 1px solid var(--hairline); color: var(--ink-2);
+  }
+
+  /* ---------- report: issues ---------- */
+  .issue { border-top: 1px solid var(--hairline); padding: 14px 0; }
+  .issue:first-of-type { border-top: none; padding-top: 4px; }
+  .issue-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .sev { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; display: inline-flex; align-items: center; gap: 5px; }
+  .sev-high { background: var(--tint-critical); color: var(--critical); }
+  .sev-medium { background: var(--tint-serious); color: var(--serious); }
+  .sev-low { background: var(--tint-warning); color: #8a6200; }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .sev-low { color: var(--warning); }
+  }
+  .issue-title { font-size: 15px; font-weight: 600; }
+  .quote {
+    font-size: 13px; color: var(--ink-2);
+    border-left: 3px solid var(--hairline); padding: 2px 12px; margin: 8px 0;
+  }
+  .issue-suggestion { font-size: 14px; color: var(--ink-2); }
+  .issue-suggestion strong { color: var(--ink-1); }
+
+  /* ---------- report: rewrites ---------- */
+  .rw { border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+  .rw-block { padding: 14px 16px; font-size: 14px; }
+  .rw-before { background: var(--page); color: var(--ink-2); }
+  .rw-after { border-top: 1px solid var(--hairline); }
+  .rw-tag { font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px; }
+  .rw-before .rw-tag { color: var(--ink-3); }
+  .rw-after .rw-tag { color: var(--good-text); }
+  .rw-why { font-size: 13px; color: var(--ink-3); padding: 10px 16px; border-top: 1px dashed var(--hairline); }
+
+  .report-actions { text-align: center; margin-top: 24px; }
+  footer { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 40px; }
+  footer a { color: var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">简历医生<span class="plus"> +</span></div>
+    <p class="tagline">粘贴简历和目标岗位 JD,30 秒生成一份 AI 诊断报告</p>
+  </header>
+
+  <!-- ============ 输入区 ============ -->
+  <section id="input-panel">
+    <div class="card">
+      <div class="field">
+        <label>简历内容 <span class="opt">建议先删除手机号、住址等隐私信息</span></label>
+        <textarea id="resume" placeholder="把简历全文粘贴到这里……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
+        <div class="counter"><span id="resume-count">0</span> / 8000</div>
+      </div>
+      <div class="field">
+        <label>目标岗位 JD <span class="opt">选填 — 不填则做通用体检</span></label>
+        <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,诊断会针对这个岗位计算匹配度……"></textarea>
+        <div class="counter"><span id="jd-count">0</span> / 8000</div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="analyze-btn">开始诊断</button>
+        <button class="btn-ghost" id="demo-btn">查看演示报告</button>
+      </div>
+      <p class="privacy">🔒 你的简历仅用于本次分析,服务器不存储任何内容。</p>
+    </div>
+  </section>
+
+  <div id="error"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>AI 医生正在阅读你的简历……约需 20–30 秒</p>
+  </div>
+
+  <!-- ============ 报告区 ============ -->
+  <section id="report">
+    <div class="card hero">
+      <div class="hero-label">综合匹配度</div>
+      <div class="hero-value"><span id="score">--</span><span class="outof"> / 100</span></div>
+      <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
+      <div class="band" id="band"></div>
+      <p class="verdict" id="verdict"></p>
+    </div>
+
+    <div class="card">
+      <h2>五维评分</h2>
+      <div id="dimensions"></div>
+    </div>
+
+    <div class="card" id="keywords-card">
+      <h2>JD 中出现但简历未覆盖的关键词</h2>
+      <p class="hint" style="margin-bottom:10px">机器初筛(ATS)按关键词匹配,如果你确实具备这些技能,务必写进简历。</p>
+      <div class="chips" id="keywords"></div>
+    </div>
+
+    <div class="card">
+      <h2>问题清单</h2>
+      <div id="issues"></div>
+    </div>
+
+    <div class="card">
+      <h2>改写示范</h2>
+      <p class="hint" style="margin-bottom:14px">挑选了最值得优化的几条经历,对照学习后可举一反三修改全文。</p>
+      <div id="rewrites"></div>
+    </div>
+
+    <div class="report-actions">
+      <button class="btn-ghost" id="back-btn">← 返回修改后再测一次</button>
+    </div>
+  </section>
+
+  <footer>简历医生 Resume Doctor · AI 生成内容仅供参考 · <a href="https://github.com/xiaozzzy/resume-doctor" id="gh-link">GitHub</a></footer>
+</div>
+
+<script>
+/* ================= 演示数据 ================= */
+const DEMO_DATA = {
+  score: 58,
+  verdict: "简历基础信息完整,但经历描述以罗列职责为主、几乎没有量化结果,与目标岗位的核心要求(数据分析、A/B 测试)匹配不足,按当前状态投递大概率通不过初筛,建议优化后再投。",
+  dimensions: [
+    { name: "岗位匹配度", score: 52, comment: "JD 要求的“数据驱动运营”“A/B 测试”在简历中完全没有体现。" },
+    { name: "量化程度", score: 40, comment: "全文只有 1 处数字,“负责”“参与”类描述占 80% 以上。" },
+    { name: "表达质量", score: 65, comment: "语句通顺,但动作动词单一,“负责”出现了 6 次。" },
+    { name: "结构完整度", score: 78, comment: "模块齐全,建议把实习经历移到教育背景之前。" },
+    { name: "关键词覆盖", score: 55, comment: "命中 JD 关键词 5/11,SQL、埋点、转化率等核心词缺失。" }
+  ],
+  missing_keywords: ["SQL", "A/B 测试", "埋点分析", "转化率", "用户分层", "竞品分析"],
+  issues: [
+    {
+      severity: "high",
+      title: "核心经历没有任何量化结果",
+      quote: "负责公众号的日常内容运营,提升了粉丝数量和阅读量。",
+      suggestion: "“提升了”没有说服力——提升了多少?周期多长?基数多大?哪怕数据一般,写出真实数字也远好于模糊表述。"
+    },
+    {
+      severity: "high",
+      title: "与 JD 核心要求错位",
+      quote: "熟练使用 Office 办公软件,具备良好的沟通能力。",
+      suggestion: "JD 明确要求“有数据分析能力,会用 SQL 优先”。如果你在课程或项目中用过 Excel 数据透视表、问卷数据分析,应该具体写出来,而不是写通用技能。"
+    },
+    {
+      severity: "medium",
+      title: "动作动词重复、平淡",
+      quote: "负责社群维护…负责活动策划…负责数据整理…",
+      suggestion: "连续的“负责”让 HR 无法区分你的贡献层次。可替换为:主导 / 搭建 / 策划并落地 / 复盘迭代等更精确的动词。"
+    },
+    {
+      severity: "low",
+      title: "自我评价空泛",
+      quote: "本人性格开朗,吃苦耐劳,有较强的学习能力。",
+      suggestion: "这类描述 HR 会直接跳过。建议改为一句话的“个人定位”:你是谁 + 最强的 1-2 个技能 + 与岗位的连接点。"
+    }
+  ],
+  rewrites: [
+    {
+      before: "负责公众号的日常内容运营,提升了粉丝数量和阅读量。",
+      after: "独立运营公众号 3 个月,产出推文 25 篇;通过选题复盘将平均阅读量从 800 提升至 2100(+163%),粉丝净增 1500+。",
+      why: "套用 STAR 法则补齐了背景(3个月)、动作(选题复盘)和可验证的结果(数字对比),“独立”一词同时传递了 ownership。"
+    },
+    {
+      before: "参与策划校园推广活动,活动效果良好。",
+      after: "策划并执行 2 场校园地推活动,设计“扫码抽奖”转化钩子,3 天内获客 600+,单个获客成本控制在 1.2 元。",
+      why: "“效果良好”被替换为可量化的获客数和成本指标——这正是运营岗 JD 中“结果导向”的直接证据。"
+    }
+  ]
+};
+
+/* ================= 工具函数 ================= */
+const $ = (id) => document.getElementById(id);
+const MAX_LEN = 8000;
+
+function bindCounter(taId, countId) {
+  const ta = $(taId), counter = $(countId);
+  ta.addEventListener('input', () => {
+    counter.textContent = ta.value.length;
+    counter.parentElement.classList.toggle('over', ta.value.length > MAX_LEN);
+  });
+}
+bindCounter('resume', 'resume-count');
+bindCounter('jd', 'jd-count');
+
+function scoreBand(score) {
+  if (score >= 80) return { label: '✓ 可直接投递', color: 'var(--good-text)', tint: 'var(--tint-good)', fill: 'var(--good)' };
+  if (score >= 65) return { label: '△ 小幅打磨后投递', color: '#8a6200', tint: 'var(--tint-warning)', fill: 'var(--warning)' };
+  if (score >= 45) return { label: '⚠ 建议优化后再投', color: 'var(--serious)', tint: 'var(--tint-serious)', fill: 'var(--serious)' };
+  return { label: '✕ 需要大幅修改', color: 'var(--critical)', tint: 'var(--tint-critical)', fill: 'var(--critical)' };
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ================= 渲染报告 ================= */
+function renderReport(data) {
+  $('input-panel').style.display = 'none';
+  $('loading').style.display = 'none';
+  $('report').style.display = 'block';
+
+  const band = scoreBand(data.score);
+  $('score').textContent = data.score;
+  $('band').textContent = band.label;
+  $('band').style.background = band.tint;
+  $('band').style.color = band.color;
+  $('verdict').textContent = data.verdict;
+  const fill = $('meter-fill');
+  fill.style.background = band.fill;
+  requestAnimationFrame(() => { fill.style.width = Math.max(2, Math.min(100, data.score)) + '%'; });
+
+  $('dimensions').innerHTML = (data.dimensions || []).map(d => `
+    <div class="dim-row">
+      <div class="dim-name">${esc(d.name)}</div>
+      <div class="dim-track"><div class="dim-fill" data-w="${Math.max(2, Math.min(100, d.score))}"></div></div>
+      <div class="dim-score">${esc(d.score)}</div>
+      <div class="dim-comment">${esc(d.comment)}</div>
+    </div>`).join('');
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.dim-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  });
+
+  const kws = data.missing_keywords || [];
+  $('keywords-card').style.display = kws.length ? 'block' : 'none';
+  $('keywords').innerHTML = kws.map(k => `<span class="chip">${esc(k)}</span>`).join('');
+
+  const sevMap = {
+    high:   { cls: 'sev-high',   icon: '●', label: '高' },
+    medium: { cls: 'sev-medium', icon: '◆', label: '中' },
+    low:    { cls: 'sev-low',    icon: '▲', label: '低' }
+  };
+  const order = { high: 0, medium: 1, low: 2 };
+  const issues = [...(data.issues || [])].sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
+  $('issues').innerHTML = issues.map(i => {
+    const s = sevMap[i.severity] || sevMap.low;
+    return `
+    <div class="issue">
+      <div class="issue-head">
+        <span class="sev ${s.cls}">${s.icon} ${s.label}</span>
+        <span class="issue-title">${esc(i.title)}</span>
+      </div>
+      ${i.quote ? `<div class="quote">"${esc(i.quote)}"</div>` : ''}
+      <div class="issue-suggestion">${esc(i.suggestion)}</div>
+    </div>`;
+  }).join('');
+
+  $('rewrites').innerHTML = (data.rewrites || []).map(r => `
+    <div class="rw">
+      <div class="rw-block rw-before"><span class="rw-tag">原文</span>${esc(r.before)}</div>
+      <div class="rw-block rw-after"><span class="rw-tag">✎ 改写后</span>${esc(r.after)}</div>
+      ${r.why ? `<div class="rw-why">为什么这样改:${esc(r.why)}</div>` : ''}
+    </div>`).join('');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showError(msg) {
+  $('loading').style.display = 'none';
+  $('input-panel').style.display = 'block';
+  const e = $('error');
+  e.textContent = msg;
+  e.style.display = 'block';
+}
+
+/* ================= 事件 ================= */
+$('demo-btn').addEventListener('click', () => renderReport(DEMO_DATA));
+
+$('back-btn').addEventListener('click', () => {
+  $('report').style.display = 'none';
+  $('input-panel').style.display = 'block';
+  window.scrollTo({ top: 0 });
+});
+
+$('analyze-btn').addEventListener('click', async () => {
+  const resume = $('resume').value.trim();
+  const jd = $('jd').value.trim();
+  $('error').style.display = 'none';
+
+  if (resume.length < 50) return showError('简历内容太短了(至少 50 字),请粘贴完整的简历文本。');
+  if (resume.length > MAX_LEN || jd.length > MAX_LEN) return showError('内容超过 8000 字上限,请精简后重试。');
+
+  $('input-panel').style.display = 'none';
+  $('loading').style.display = 'block';
+
+  try {
+    const resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resume, jd })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || '分析失败,请稍后重试。');
+    renderReport(data);
+  } catch (err) {
+    showError(err.message === 'Failed to fetch'
+      ? '无法连接分析服务。如果你在本地直接打开了 HTML 文件,请先部署或启动本地服务;也可以点击"查看演示报告"体验效果。'
+      : err.message);
+  }
+});
+</script>
+</body>
+</html>
