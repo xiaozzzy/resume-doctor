@@ -83,8 +83,15 @@
   }
   textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
   .field { margin-bottom: 16px; }
-  .field label { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-  .field label .opt { font-weight: 400; color: var(--ink-3); font-size: 12px; }
+  .field label { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+  .field label .opt { font-weight: 400; color: var(--ink-3); font-size: 12px; margin-left: auto; }
+  .btn-mini {
+    font-size: 12px; padding: 3px 12px; border-radius: 999px;
+    background: transparent; color: var(--accent); border: 1px solid var(--accent);
+    cursor: pointer; font-weight: 500;
+  }
+  .btn-mini:hover { background: var(--accent-track); }
+  .btn-mini:disabled { opacity: 0.5; cursor: wait; }
   .counter { font-size: 12px; color: var(--ink-3); text-align: right; margin-top: 4px; }
   .counter.over { color: var(--critical); }
 
@@ -183,7 +190,13 @@
   .rw-after .rw-tag { color: var(--good-text); }
   .rw-why { font-size: 13px; color: var(--ink-3); padding: 10px 16px; border-top: 1px dashed var(--hairline); }
 
-  .report-actions { text-align: center; margin-top: 24px; }
+  .report-actions { text-align: center; margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .rw-output {
+    white-space: pre-wrap; word-break: break-word;
+    font-family: inherit; font-size: 14px; line-height: 1.8;
+    background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
+    padding: 18px; max-height: 60vh; overflow-y: auto;
+  }
   footer { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 40px; }
   footer a { color: var(--ink-3); }
 </style>
@@ -199,12 +212,20 @@
   <section id="input-panel">
     <div class="card">
       <div class="field">
-        <label>简历内容 <span class="opt">建议先删除手机号、住址等隐私信息</span></label>
-        <textarea id="resume" placeholder="把简历全文粘贴到这里……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
+        <label>简历内容
+          <button class="btn-mini" id="resume-pdf-btn" type="button">📄 上传 PDF</button>
+          <span class="opt">建议先删除手机号、住址等隐私信息</span>
+        </label>
+        <input type="file" id="resume-pdf" accept=".pdf,application/pdf" style="display:none">
+        <textarea id="resume" placeholder="把简历全文粘贴到这里,或点击上方“上传 PDF”自动读取……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
         <div class="counter"><span id="resume-count">0</span> / 8000</div>
       </div>
       <div class="field">
-        <label>目标岗位 JD <span class="opt">选填 — 不填则做通用体检</span></label>
+        <label>目标岗位 JD
+          <button class="btn-mini" id="jd-pdf-btn" type="button">📄 上传 PDF</button>
+          <span class="opt">选填 — 不填则做通用体检</span>
+        </label>
+        <input type="file" id="jd-pdf" accept=".pdf,application/pdf" style="display:none">
         <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,诊断会针对这个岗位计算匹配度……"></textarea>
         <div class="counter"><span id="jd-count">0</span> / 8000</div>
       </div>
@@ -256,7 +277,22 @@
     </div>
 
     <div class="report-actions">
+      <button class="btn-primary" id="rewrite-btn">✨ 一键生成修改版简历</button>
       <button class="btn-ghost" id="back-btn">← 返回修改后再测一次</button>
+    </div>
+  </section>
+
+  <!-- ============ 修改版简历 ============ -->
+  <section id="rewrite-view" style="display:none">
+    <div class="card">
+      <h2>✨ 修改版简历</h2>
+      <p class="hint" style="margin-bottom:14px">AI 只基于你的真实经历改写,不会虚构内容。文中 <strong>[X]</strong> 是数据占位符——请务必替换成你的真实数字后再使用。</p>
+      <pre id="rewrite-content" class="rw-output"></pre>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn-primary" id="copy-btn">复制全文</button>
+        <button class="btn-ghost" id="download-btn">下载 .md 文件</button>
+        <button class="btn-ghost" id="rewrite-back-btn">← 返回诊断报告</button>
+      </div>
     </div>
   </section>
 
@@ -345,6 +381,7 @@ function esc(s) {
 function renderReport(data) {
   $('input-panel').style.display = 'none';
   $('loading').style.display = 'none';
+  $('rewrite-view').style.display = 'none';
   $('report').style.display = 'block';
 
   const band = scoreBand(data.score);
@@ -410,11 +447,178 @@ function showError(msg) {
   e.style.display = 'block';
 }
 
+/* ================= PDF 解析(浏览器端,文件不上传服务器) ================= */
+const PDFJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38';
+let pdfjsReady = null;
+function loadPdfJs() {
+  if (!pdfjsReady) {
+    pdfjsReady = (async () => {
+      try {
+        const mod = await import(`${PDFJS_BASE}/pdf.min.mjs`);
+        mod.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.mjs`;
+        window.pdfjsLib = mod;
+      } catch (e) {
+        pdfjsReady = null;
+        throw new Error('PDF 解析组件加载失败,请检查网络后重试(或手动粘贴文本)。');
+      }
+    })();
+  }
+  return pdfjsReady;
+}
+
+async function extractPdfText(file) {
+  await loadPdfJs();
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    let lastY = null, line = [];
+    const lines = [];
+    for (const item of tc.items) {
+      const y = item.transform ? item.transform[5] : null;
+      if (lastY !== null && y !== null && Math.abs(y - lastY) > 2) {
+        lines.push(line.join(' ')); line = [];
+      }
+      if (item.str && item.str.trim()) line.push(item.str.trim());
+      if (y !== null) lastY = y;
+    }
+    if (line.length) lines.push(line.join(' '));
+    text += lines.join('\n') + '\n';
+  }
+  return text.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function bindPdfUpload(btnId, inputId, taId, countId) {
+  const btn = $(btnId), input = $(inputId), ta = $(taId);
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) return;
+    $('error').style.display = 'none';
+    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = '解析中…';
+    try {
+      const text = await extractPdfText(file);
+      if (!text || text.length < 30) {
+        throw new Error('这份 PDF 提取不到文字,可能是扫描件/图片版。请改用文字版 PDF,或手动粘贴文本。');
+      }
+      ta.value = text.slice(0, MAX_LEN);
+      $(countId).textContent = ta.value.length;
+      btn.textContent = '✓ 已读取';
+      setTimeout(() => { btn.textContent = origText; }, 2500);
+    } catch (err) {
+      showError(err.message || 'PDF 解析失败,请手动粘贴文本。');
+      btn.textContent = origText;
+    } finally {
+      btn.disabled = false;
+      input.value = '';
+    }
+  });
+}
+bindPdfUpload('resume-pdf-btn', 'resume-pdf', 'resume', 'resume-count');
+bindPdfUpload('jd-pdf-btn', 'jd-pdf', 'jd', 'jd-count');
+
+/* ================= 一键生成修改版简历 ================= */
+let lastInput = { resume: '', jd: '' };
+
+const DEMO_REWRITE = `# [姓名]
+
+**求职意向:AI 产品运营 | [电话] | [邮箱]**
+
+> 市场营销专业应届生,独立运营过 [X] 万粉丝公众号,擅长内容策划与数据复盘,正将 AI 工具深度应用于运营工作流。
+
+## 核心技能
+- 内容运营:选题策划、推文撰写、阅读量复盘迭代
+- 数据分析:Excel 数据透视表、活动转化率统计
+- 活动策划:校园地推活动全流程执行
+
+## 实习经历
+**某互联网公司 · 运营实习生**(2025.3 – 2025.6)
+- 独立运营公众号 [X] 个月,产出推文 [X] 篇,通过选题复盘将平均阅读量从 [X] 提升至 [X](+[X]%)
+- 策划并执行 [X] 场校园推广活动,设计转化钩子,累计获客 [X] 人,单个获客成本控制在 [X] 元
+
+## 教育背景
+**某大学 · 市场营销专业**(2022 – 2026)
+
+---
+
+📝 待你补充的信息:
+1. 公众号运营时长、推文数量、阅读量前后对比数据
+2. 校园活动场次、获客人数、获客成本`;
+
+async function doRewrite() {
+  if (!lastInput.resume) { // 演示模式进来的,没有原文
+    $('report').style.display = 'none';
+    $('rewrite-view').style.display = 'block';
+    $('rewrite-content').textContent = DEMO_REWRITE;
+    window.scrollTo({ top: 0 });
+    return;
+  }
+  const btn = $('rewrite-btn');
+  btn.disabled = true;
+  btn.textContent = '生成中…约需 30-60 秒';
+  try {
+    const resp = await fetch('/api/rewrite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastInput)
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || '生成失败,请稍后重试。');
+    $('report').style.display = 'none';
+    $('rewrite-view').style.display = 'block';
+    $('rewrite-content').textContent = data.content;
+    window.scrollTo({ top: 0 });
+  } catch (err) {
+    alert(err.message === 'Failed to fetch' ? '无法连接服务,请稍后重试。' : err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ 一键生成修改版简历';
+  }
+}
+
+$('rewrite-btn').addEventListener('click', doRewrite);
+
+$('rewrite-back-btn').addEventListener('click', () => {
+  $('rewrite-view').style.display = 'none';
+  $('report').style.display = 'block';
+  window.scrollTo({ top: 0 });
+});
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText($('rewrite-content').textContent);
+    $('copy-btn').textContent = '✓ 已复制';
+  } catch {
+    // 剪贴板 API 不可用时的兜底
+    const r = document.createRange();
+    r.selectNodeContents($('rewrite-content'));
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand('copy');
+    $('copy-btn').textContent = '✓ 已复制';
+  }
+  setTimeout(() => { $('copy-btn').textContent = '复制全文'; }, 2000);
+});
+
+$('download-btn').addEventListener('click', () => {
+  const blob = new Blob([$('rewrite-content').textContent], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '修改版简历.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
 /* ================= 事件 ================= */
-$('demo-btn').addEventListener('click', () => renderReport(DEMO_DATA));
+$('demo-btn').addEventListener('click', () => { lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
 
 $('back-btn').addEventListener('click', () => {
   $('report').style.display = 'none';
+  $('rewrite-view').style.display = 'none';
   $('input-panel').style.display = 'block';
   window.scrollTo({ top: 0 });
 });
@@ -427,6 +631,7 @@ $('analyze-btn').addEventListener('click', async () => {
   if (resume.length < 50) return showError('简历内容太短了(至少 50 字),请粘贴完整的简历文本。');
   if (resume.length > MAX_LEN || jd.length > MAX_LEN) return showError('内容超过 8000 字上限,请精简后重试。');
 
+  lastInput = { resume, jd };
   $('input-panel').style.display = 'none';
   $('loading').style.display = 'block';
 
