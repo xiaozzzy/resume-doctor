@@ -82,6 +82,13 @@
     resize: vertical;
   }
   textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  .txt {
+    width: 100%; border: 1px solid var(--hairline); border-radius: 8px;
+    background: var(--page); color: var(--ink-1); padding: 10px 12px;
+    font-size: 15px; font-family: inherit;
+  }
+  .txt:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  #auth-status a { color: var(--ink-3); }
   .field { margin-bottom: 16px; }
   .field label { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
   .field label .opt { font-weight: 400; color: var(--ink-3); font-size: 12px; margin-left: auto; }
@@ -206,6 +213,8 @@
   <header>
     <div class="logo">简历医生<span class="plus"> +</span></div>
     <p class="tagline">粘贴简历和目标岗位 JD,30 秒生成一份 AI 诊断报告</p>
+    <p class="tagline" id="stats-line" style="font-size:13px"></p>
+    <p class="tagline" id="auth-status" style="font-size:12px"></p>
   </header>
 
   <!-- ============ 输入区 ============ -->
@@ -279,6 +288,30 @@
     <div class="report-actions">
       <button class="btn-primary" id="rewrite-btn">✨ 一键生成修改版简历</button>
       <button class="btn-ghost" id="back-btn">← 返回修改后再测一次</button>
+    </div>
+  </section>
+
+  <!-- ============ 邮箱登录 ============ -->
+  <section id="login-view" style="display:none">
+    <div class="card" style="max-width:440px;margin:0 auto">
+      <h2>邮箱登录</h2>
+      <p class="hint" style="margin-bottom:14px">开始诊断前需要验证邮箱(仅用于统计用户量,不会发送营销邮件,也不会关联你的简历内容)。</p>
+      <div class="field">
+        <label>邮箱地址</label>
+        <input type="email" id="login-email" class="txt" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>验证码</label>
+        <div style="display:flex;gap:10px">
+          <input id="login-code" class="txt" maxlength="6" inputmode="numeric" placeholder="6 位数字" style="flex:1">
+          <button class="btn-ghost" id="send-code-btn" type="button" style="white-space:nowrap">发送验证码</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="login-btn">登录</button>
+        <button class="btn-ghost" id="login-back-btn">← 返回</button>
+      </div>
+      <p class="hint" id="login-msg" style="margin-top:12px"></p>
     </div>
   </section>
 
@@ -563,10 +596,11 @@ async function doRewrite() {
   try {
     const resp = await fetch('/api/rewrite', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify(lastInput)
     });
     const data = await resp.json();
+    if (resp.status === 401) { handleAuthFailure(data.error); return; }
     if (!resp.ok) throw new Error(data.error || '生成失败,请稍后重试。');
     $('report').style.display = 'none';
     $('rewrite-view').style.display = 'block';
@@ -580,7 +614,10 @@ async function doRewrite() {
   }
 }
 
-$('rewrite-btn').addEventListener('click', doRewrite);
+$('rewrite-btn').addEventListener('click', () => {
+  if (!lastInput.resume) { doRewrite(); return; } // 演示模式无需登录
+  requireLogin(doRewrite, 'report');
+});
 
 $('rewrite-back-btn').addEventListener('click', () => {
   $('rewrite-view').style.display = 'none';
@@ -623,7 +660,147 @@ $('back-btn').addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
-$('analyze-btn').addEventListener('click', async () => {
+/* ================= 登录态管理 ================= */
+let authToken = '', authEmail = '';
+try {
+  authToken = localStorage.getItem('rd_token') || '';
+  authEmail = localStorage.getItem('rd_email') || '';
+} catch {}
+let pendingAction = null;
+let loginReturnView = 'input-panel';
+
+function authHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  if (authToken) h['Authorization'] = 'Bearer ' + authToken;
+  return h;
+}
+
+function renderAuthStatus() {
+  $('auth-status').innerHTML = authEmail
+    ? `已登录:${esc(authEmail)} · <a href="#" id="logout-link">退出</a>`
+    : '';
+  const link = document.getElementById('logout-link');
+  if (link) link.addEventListener('click', (e) => {
+    e.preventDefault();
+    authToken = ''; authEmail = '';
+    try { localStorage.removeItem('rd_token'); localStorage.removeItem('rd_email'); } catch {}
+    renderAuthStatus();
+  });
+}
+
+function showLogin(returnView) {
+  loginReturnView = returnView || 'input-panel';
+  ['input-panel', 'report', 'rewrite-view'].forEach(id => { $(id).style.display = 'none'; });
+  $('loading').style.display = 'none';
+  $('login-view').style.display = 'block';
+  $('login-msg').textContent = '';
+  window.scrollTo({ top: 0 });
+}
+
+function hideLogin() {
+  $('login-view').style.display = 'none';
+  $(loginReturnView).style.display = 'block';
+}
+
+function requireLogin(action, returnView) {
+  if (authToken) { action(); return; }
+  pendingAction = action;
+  showLogin(returnView);
+}
+
+function handleAuthFailure(msg) {
+  authToken = ''; authEmail = '';
+  try { localStorage.removeItem('rd_token'); localStorage.removeItem('rd_email'); } catch {}
+  renderAuthStatus();
+  showLogin('input-panel');
+  $('login-msg').textContent = msg || '登录已过期,请重新登录。';
+}
+
+$('send-code-btn').addEventListener('click', async () => {
+  const email = $('login-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    $('login-msg').textContent = '请输入正确的邮箱地址。'; return;
+  }
+  const btn = $('send-code-btn');
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/api/auth-send-code', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || '发送失败');
+    $('login-msg').textContent = '验证码已发送,请检查收件箱(可能在垃圾邮件里)。';
+    let cd = 60;
+    btn.textContent = `${cd}s 后可重发`;
+    const timer = setInterval(() => {
+      cd--;
+      if (cd <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '发送验证码'; }
+      else btn.textContent = `${cd}s 后可重发`;
+    }, 1000);
+  } catch (err) {
+    $('login-msg').textContent = err.message === 'Failed to fetch' ? '网络异常,请重试。' : err.message;
+    btn.disabled = false;
+  }
+});
+
+$('login-btn').addEventListener('click', async () => {
+  const email = $('login-email').value.trim();
+  const code = $('login-code').value.trim();
+  if (!/^\d{6}$/.test(code)) { $('login-msg').textContent = '请输入 6 位数字验证码。'; return; }
+  const btn = $('login-btn');
+  btn.disabled = true; btn.textContent = '登录中…';
+  try {
+    const resp = await fetch('/api/auth-verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || '登录失败');
+    authToken = data.token; authEmail = data.email;
+    try { localStorage.setItem('rd_token', authToken); localStorage.setItem('rd_email', authEmail); } catch {}
+    renderAuthStatus();
+    hideLogin();
+    const act = pendingAction; pendingAction = null;
+    if (act) act();
+  } catch (err) {
+    $('login-msg').textContent = err.message === 'Failed to fetch' ? '网络异常,请重试。' : err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '登录';
+  }
+});
+
+$('login-back-btn').addEventListener('click', () => { pendingAction = null; hideLogin(); });
+
+/* ================= 公开统计 ================= */
+fetch('/api/stats').then(r => r.json()).then(s => {
+  if (s && s.analyses > 0) {
+    $('stats-line').textContent = `已有 ${s.users} 位求职者在这里完成了 ${s.analyses} 次诊断`;
+  }
+}).catch(() => {});
+
+/* ================= 诊断 ================= */
+async function runAnalysis() {
+  $('input-panel').style.display = 'none';
+  $('loading').style.display = 'block';
+  try {
+    const resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(lastInput)
+    });
+    const data = await resp.json();
+    if (resp.status === 401) { handleAuthFailure(data.error); return; }
+    if (!resp.ok) throw new Error(data.error || '分析失败,请稍后重试。');
+    renderReport(data);
+  } catch (err) {
+    showError(err.message === 'Failed to fetch'
+      ? '无法连接分析服务。如果你在本地直接打开了 HTML 文件,请先部署或启动本地服务;也可以点击"查看演示报告"体验效果。'
+      : err.message);
+  }
+}
+
+$('analyze-btn').addEventListener('click', () => {
   const resume = $('resume').value.trim();
   const jd = $('jd').value.trim();
   $('error').style.display = 'none';
@@ -632,24 +809,11 @@ $('analyze-btn').addEventListener('click', async () => {
   if (resume.length > MAX_LEN || jd.length > MAX_LEN) return showError('内容超过 8000 字上限,请精简后重试。');
 
   lastInput = { resume, jd };
-  $('input-panel').style.display = 'none';
-  $('loading').style.display = 'block';
-
-  try {
-    const resp = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ resume, jd })
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || '分析失败,请稍后重试。');
-    renderReport(data);
-  } catch (err) {
-    showError(err.message === 'Failed to fetch'
-      ? '无法连接分析服务。如果你在本地直接打开了 HTML 文件,请先部署或启动本地服务;也可以点击"查看演示报告"体验效果。'
-      : err.message);
-  }
+  requireLogin(runAnalysis, 'input-panel');
 });
+
+renderAuthStatus();
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
