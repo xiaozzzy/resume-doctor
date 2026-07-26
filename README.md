@@ -3,6 +3,8 @@
 > 粘贴简历 + 目标岗位 JD,30 秒生成一份 AI 诊断报告。
 > 一个从真实求职痛点出发、由 AI 产品经理视角设计并借助 AI 编程工具独立完成的 MVP。
 
+**🌐 在线体验:[520resume-doctor.online](https://520resume-doctor.online)**(备用地址:[resume-doctor-iota.vercel.app](https://resume-doctor-iota.vercel.app))
+
 ![输入页](docs/screenshots/input.png)
 ![诊断报告](docs/screenshots/report.png)
 
