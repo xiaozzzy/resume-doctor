@@ -84,7 +84,7 @@ module.exports = async (req, res) => {
     const content = result?.choices?.[0]?.message?.content;
     if (!content || !content.trim()) throw new Error('empty model response');
 
-    redis('incr', 'count:rewrites').catch(() => {});
+    await redis('incr', 'count:rewrites').catch(() => {});
 
     return res.status(200).json({ content: content.trim() });
   } catch (err) {

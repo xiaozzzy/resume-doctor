@@ -141,7 +141,7 @@ module.exports = async (req, res) => {
     report.issues = Array.isArray(report.issues) ? report.issues : [];
     report.rewrites = Array.isArray(report.rewrites) ? report.rewrites : [];
 
-    redis('incr', 'count:analyses').catch(() => {}); // 计数失败不影响主流程
+    await redis('incr', 'count:analyses').catch(() => {}); // 计数失败不影响主流程
 
     return res.status(200).json(report);
   } catch (err) {
