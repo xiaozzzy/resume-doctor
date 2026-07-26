@@ -919,7 +919,7 @@ async function buildPoster() {
   ctx.save();
   ctx.shadowColor = 'rgba(42,120,214,0.28)'; ctx.shadowBlur = 30 * S; ctx.shadowOffsetY = 10 * S;
   ctx.fillStyle = '#ffffff';
-  rrect(ctx, 40 * S, 156 * S, 670 * S, 660 * S, 26 * S); ctx.fill();
+  rrect(ctx, 40 * S, 156 * S, 670 * S, 682 * S, 26 * S); ctx.fill();
   ctx.restore();
 
   // 分数
@@ -947,7 +947,7 @@ async function buildPoster() {
 
   // 五维评分条
   const dims = d.dimensions || [];
-  let dy = 496 * S;
+  let dy = 484 * S;
   ctx.textAlign = 'left';
   for (const dim of dims) {
     ctx.fillStyle = GRAY; ctx.font = `${22 * S}px ${FONT}`;
@@ -960,13 +960,13 @@ async function buildPoster() {
     rrect(ctx, bx, dy - 10 * S, fw, 20 * S, 10 * S); ctx.fill();
     ctx.fillStyle = NAVY; ctx.font = `700 ${24 * S}px ${FONT}`;
     ctx.fillText(String(dim.score), bx + bwidth + 24 * S, dy + 9 * S);
-    dy += 54 * S;
+    dy += 50 * S;
   }
 
   // 总评(截断 3 行)
   ctx.fillStyle = GRAY; ctx.font = `${20 * S}px ${FONT}`;
   const vlines = wrapText(ctx, d.verdict || '', 600 * S, 3);
-  let vy = dy + 26 * S;
+  let vy = dy + 24 * S;
   for (const line of vlines) { ctx.fillText(line, 78 * S, vy); vy += 32 * S; }
 
   // 底部二维码卡片
