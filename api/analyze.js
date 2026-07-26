@@ -8,6 +8,8 @@
  *   MODEL_NAME        — 选填,默认 deepseek-chat
  */
 
+const { redis, sessionEmail } = require('./_kv.js');
+
 const MAX_LEN = 8000;
 
 const SYSTEM_PROMPT = `你是一位有 10 年经验的资深 HR 兼猎头,擅长一眼看出简历的问题并给出可落地的修改建议。你将收到一份简历文本,可能还有一份目标岗位 JD。
@@ -63,6 +65,9 @@ module.exports = async (req, res) => {
   if (!apiKey) {
     return res.status(500).json({ error: '服务器尚未配置 API Key(环境变量 DEEPSEEK_API_KEY)。你可以先点击"查看演示报告"体验效果。' });
   }
+
+  const who = await sessionEmail(req);
+  if (!who) return res.status(401).json({ error: '请先登录后再使用诊断功能。' });
 
   const { resume, jd } = req.body || {};
   if (!resume || typeof resume !== 'string' || resume.trim().length < 50) {
@@ -135,6 +140,8 @@ module.exports = async (req, res) => {
     report.missing_keywords = Array.isArray(report.missing_keywords) ? report.missing_keywords : [];
     report.issues = Array.isArray(report.issues) ? report.issues : [];
     report.rewrites = Array.isArray(report.rewrites) ? report.rewrites : [];
+
+    redis('incr', 'count:analyses').catch(() => {}); // 计数失败不影响主流程
 
     return res.status(200).json(report);
   } catch (err) {
