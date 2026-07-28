@@ -53,6 +53,20 @@
   }
   .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
 
+  /* ---------- 顶部"完全免费"横幅 ---------- */
+  .free-banner {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    max-width: 520px; margin: 0 auto 22px;
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.3px;
+    border-radius: 999px; padding: 10px 22px;
+    box-shadow: 0 8px 22px -8px rgba(42,120,214,0.55);
+  }
+  .free-banner .fb-sub { font-size: 12px; font-weight: 500; opacity: 0.92; }
+  @media (max-width: 480px) {
+    .free-banner { flex-direction: column; gap: 2px; padding: 10px 16px; }
+  }
+
   /* ---------- header ---------- */
   header { text-align: center; margin-bottom: 30px; }
   .logo { font-size: 34px; font-weight: 800; letter-spacing: 0.5px; }
@@ -191,6 +205,28 @@
   }
   .verdict { color: var(--ink-2); font-size: 15px; max-width: 560px; margin: 14px auto 0; }
 
+  /* ---------- 新增·功能1:改写前后打分对比 ---------- */
+  .score-delta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px; font-size: 14px; font-weight: 600;
+    padding: 6px 16px; border-radius: 999px;
+    background: var(--tint-good); color: var(--good-text);
+  }
+  .score-delta b { font-weight: 800; }
+
+  /* ---------- 新增·功能2:高亮最该改的 3 条 ---------- */
+  #top3-card { border-color: var(--accent); background: linear-gradient(180deg, rgba(42,120,214,0.055), var(--surface)); }
+  .top3-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px dashed var(--hairline); }
+  .top3-item:first-child { border-top: none; padding-top: 4px; }
+  .top3-num {
+    flex: none; width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #7c5cff); color: #fff;
+    font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  }
+  .top3-body { font-size: 14px; }
+  .top3-body b { color: var(--ink-1); }
+  .top3-body .top3-fix { color: var(--ink-2); display: block; margin-top: 3px; line-height: 1.6; }
+
   /* ---------- report: dimensions ---------- */
   .dim-row { display: grid; grid-template-columns: 96px 1fr 40px; gap: 12px; align-items: center; padding: 9px 0; }
   .dim-name { font-size: 14px; color: var(--ink-2); }
@@ -234,6 +270,28 @@
   .rw-before .rw-tag { color: var(--ink-3); }
   .rw-after .rw-tag { color: var(--good-text); }
   .rw-why { font-size: 13px; color: var(--ink-3); padding: 10px 16px; border-top: 1px dashed var(--hairline); }
+  /* 新增·功能3:改写示范逐条一键复制 */
+  .rw-copy {
+    float: right; font-size: 12px; padding: 3px 11px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--hairline); color: var(--accent);
+    cursor: pointer; margin-left: 10px;
+  }
+  .rw-copy:hover { background: var(--accent-track); }
+
+  /* ---------- 新增·功能5:根据 JD 的模拟面试题 ---------- */
+  .iv-q { border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .iv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .iv-cat { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-track); border-radius: 999px; padding: 3px 12px; }
+  .iv-copy { float: none; margin: 0; }
+  .iv-question { font-size: 15px; font-weight: 600; color: var(--ink-1); line-height: 1.6; }
+  .iv-focus { font-size: 13px; color: var(--ink-3); margin-top: 8px; }
+  .iv-tip { font-size: 13px; color: var(--ink-2); margin-top: 8px; background: var(--tint-good); border-radius: 8px; padding: 9px 12px; line-height: 1.6; }
+  #interview-view { display: none; }
+
+  /* 首页功能卡可点击直接使用 */
+  .feat-card[data-act] { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+  .feat-card[data-act]:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 22px -10px rgba(42,120,214,0.4); }
+  .feat-card .feat-go { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--accent); }
 
   .report-actions { text-align: center; margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .rw-output {
@@ -242,12 +300,77 @@
     background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
     padding: 18px; max-height: 60vh; overflow-y: auto;
   }
+
+  /* ---------- 新增·功能4:排版模板选择器 ---------- */
+  .tpl-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tpl-card {
+    display: flex; flex-direction: column; gap: 8px; text-align: left;
+    background: var(--surface); border: 1.5px solid var(--hairline); border-radius: 12px;
+    padding: 12px; cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .tpl-card:hover { transform: translateY(-2px); }
+  .tpl-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-track); }
+  .tpl-name { font-size: 14px; font-weight: 700; color: var(--ink-1); }
+  .tpl-desc { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+  .tpl-mini { display: block; background: #fff; border: 1px solid #e1e0d9; border-radius: 6px; padding: 9px 10px; height: 78px; overflow: hidden; }
+  .tpl-mini i { display: block; border-radius: 2px; }
+  .tpl-mini .m-title { height: 7px; width: 52%; margin: 0 auto 7px; background: #333; }
+  .tpl-mini .m-h2 { height: 5px; width: 40%; margin: 7px 0 4px; background: #2a78d6; }
+  .tpl-mini .m-line { height: 3px; width: 100%; background: #d8d8d3; margin: 3px 0; }
+  .tpl-mini .m-line.short { width: 68%; }
+  .tpl-mini.m-classic .m-title { background: #1c5cab; }
+  .tpl-mini.m-classic .m-h2 { background: #2a78d6; }
+  .tpl-mini.m-modern .m-title { background: #111; width: 58%; margin: 0 0 7px; }
+  .tpl-mini.m-modern .m-h2 { background: #0b2545; width: 62%; height: 9px; border-radius: 3px; }
+  .tpl-mini.m-minimal .m-title { background: #000; width: 48%; }
+  .tpl-mini.m-minimal .m-h2 { background: #000; width: 34%; height: 3px; }
+  .tpl-mini.m-elegant { font-family: Georgia, serif; }
+  .tpl-mini.m-elegant .m-title { background: #6b4f2a; }
+  .tpl-mini.m-elegant .m-h2 { background: #b08d57; }
+
+  /* ---------- 截图版首页营销板块 ---------- */
+  .landing { margin-top: 6px; }
+  .sec-title { text-align: center; font-size: 21px; font-weight: 800; margin: 38px 0 6px; }
+  .sec-sub { text-align: center; color: var(--ink-3); font-size: 14px; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 14px; }
+  .feat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: 0 1px 2px rgba(11,11,11,0.04); }
+  .feat-ico { font-size: 26px; }
+  .feat-card h3 { font-size: 15px; margin: 8px 0 6px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .feat-card p { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+  .badge-new { font-size: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), #7c5cff); border-radius: 999px; padding: 1px 8px; letter-spacing: 0.5px; }
+  .ba-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
+  @media (max-width: 560px) { .ba-demo { grid-template-columns: 1fr; } }
+  .ba-box { border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; font-size: 13px; line-height: 1.7; }
+  .ba-before { background: var(--page); color: var(--ink-2); }
+  .ba-after { background: var(--tint-good); border-color: var(--good); }
+  .ba-label { font-size: 12px; font-weight: 700; display: block; margin-bottom: 8px; }
+  .ba-before .ba-label { color: var(--ink-3); }
+  .ba-after .ba-label { color: var(--good-text); }
+  .dim5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .dim5 .d5 { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+  .dim5 .d5 .d5-ico { font-size: 20px; }
+  .dim5 .d5 b { font-size: 14px; display: block; margin: 6px 0 4px; }
+  .dim5 .d5 p { font-size: 12px; color: var(--ink-3); line-height: 1.55; }
+  .who { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .who .w { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; text-align: center; }
+  .who .w .wico { font-size: 26px; }
+  .who .w b { display: block; margin: 8px 0 5px; font-size: 14px; }
+  .who .w p { font-size: 12px; color: var(--ink-3); line-height: 1.55; }
+  .faq details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2px 16px; margin-bottom: 10px; }
+  .faq summary { cursor: pointer; font-size: 14px; font-weight: 600; padding: 13px 0; list-style: none; display: flex; align-items: center; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::before { content: "＋"; color: var(--accent); margin-right: 10px; font-weight: 700; }
+  .faq details[open] summary::before { content: "－"; }
+  .faq p { font-size: 13px; color: var(--ink-2); padding: 0 0 14px 24px; line-height: 1.75; }
+  .cta-row { text-align: center; margin: 30px 0 4px; }
+
   footer { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 40px; }
   footer a { color: var(--ink-3); }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="free-banner">🎁 功能完全免费 <span class="fb-sub">· 无广告 · 不存储简历</span></div>
   <header>
     <div class="logo">简历医生<span class="plus"> +</span></div>
     <p class="tagline">粘贴简历和目标岗位 JD,30 秒生成一份 AI 诊断报告</p>
@@ -284,10 +407,93 @@
         <div class="counter"><span id="jd-count">0</span> / 8000</div>
       </div>
       <div class="actions">
-        <button class="btn-primary" id="analyze-btn">开始诊断</button>
-        <button class="btn-ghost" id="demo-btn">查看演示报告</button>
+        <button class="btn-primary" id="analyze-btn">🩺 开始诊断</button>
+        <button class="btn-ghost" id="rewrite-direct-btn">✨ 直接改写 + 选模板</button>
+        <button class="btn-ghost" id="interview-btn">🎤 生成模拟面试题</button>
+        <button class="btn-ghost" id="demo-btn">👀 查看演示</button>
       </div>
-      <p class="privacy">🔒 你的简历仅用于本次分析,服务器不存储任何内容。</p>
+      <p class="privacy">🔒 你的简历仅用于本次分析,服务器不存储任何内容。上面三个功能都可以直接用——先粘贴简历(想做面试题/精准诊断的话再填上 JD)。</p>
+    </div>
+
+    <!-- ====== 截图版营销板块 ====== -->
+    <div class="landing">
+      <div class="sec-title">你会得到什么</div>
+      <div class="sec-sub">一次诊断,拿到一份能直接照着改的"简历体检报告"——每张卡片都能点,直接开始用</div>
+      <div class="feat-grid">
+        <div class="feat-card" data-act="analyze-btn">
+          <div class="feat-ico">🎯</div>
+          <h3>综合匹配度打分</h3>
+          <p>0–100 分,一眼判断这份简历现在能不能投,不用再自己瞎猜。</p>
+          <span class="feat-go">点这里开始诊断 →</span>
+        </div>
+        <div class="feat-card" data-act="analyze-btn">
+          <div class="feat-ico">🩺</div>
+          <h3>五个维度体检</h3>
+          <p>岗位匹配、量化程度、表达质量、结构、关键词覆盖，逐项打分给评语。</p>
+          <span class="feat-go">点这里开始诊断 →</span>
+        </div>
+        <div class="feat-card" data-act="analyze-btn">
+          <div class="feat-ico">✍️</div>
+          <h3>逐条改写示范 <span class="badge-new">升级</span></h3>
+          <p>原文 vs 改写后对照着看,每条改写都能一键复制,拿走就能用。</p>
+          <span class="feat-go">点这里开始诊断 →</span>
+        </div>
+        <div class="feat-card" data-act="rewrite-direct-btn">
+          <div class="feat-ico">📄</div>
+          <h3>多模板一键导出 <span class="badge-new">新增</span></h3>
+          <p>挑一套排版模板(共 4 套),一页纸 / 不限页数直接导出 PDF。</p>
+          <span class="feat-go">点这里直接改写 →</span>
+        </div>
+        <div class="feat-card" data-act="interview-btn">
+          <div class="feat-ico">🎤</div>
+          <h3>模拟面试提问 <span class="badge-new">新增</span></h3>
+          <p>根据你的简历和目标 JD 出 6–8 道面试题,附考察点和回答思路,面试前先自测。</p>
+          <span class="feat-go">点这里生成面试题 →</span>
+        </div>
+      </div>
+
+      <div class="sec-title">AI 改写长这样</div>
+      <div class="sec-sub">不虚构、只基于你的真实经历,把"平淡罗列"改成"有结果的表达"</div>
+      <div class="ba-demo">
+        <div class="ba-box ba-before">
+          <span class="ba-label">改写前</span>
+          负责公众号的日常内容运营,提升了粉丝数量和阅读量。
+        </div>
+        <div class="ba-box ba-after">
+          <span class="ba-label">✎ 改写后</span>
+          独立运营公众号 3 个月,产出推文 25 篇;通过选题复盘将平均阅读量从 800 提升至 2100(+163%),粉丝净增 1500+。
+        </div>
+      </div>
+
+      <div class="sec-title">五个维度,像体检一样</div>
+      <div class="sec-sub">哪块"生病"了、该先治哪里,报告里说得清清楚楚</div>
+      <div class="dim5">
+        <div class="d5"><div class="d5-ico">🎯</div><b>岗位匹配度</b><p>简历和目标 JD 的核心要求对不对得上。</p></div>
+        <div class="d5"><div class="d5-ico">📊</div><b>量化程度</b><p>有没有用数字说话,而不是只写"负责""参与"。</p></div>
+        <div class="d5"><div class="d5-ico">✒️</div><b>表达质量</b><p>动作动词是否精准有力,有没有反复啰嗦。</p></div>
+        <div class="d5"><div class="d5-ico">🧱</div><b>结构完整度</b><p>模块是否齐全、顺序是否合理。</p></div>
+        <div class="d5"><div class="d5-ico">🔑</div><b>关键词覆盖</b><p>能不能过机器初筛(ATS)的关键词匹配。</p></div>
+      </div>
+
+      <div class="sec-title">适合谁用</div>
+      <div class="sec-sub">只要你正在投简历,它就能帮你把命中率提上来</div>
+      <div class="who">
+        <div class="w"><div class="wico">🎓</div><b>应届毕业生</b><p>没经验不知道怎么写,先体检再照着改写模板补。</p></div>
+        <div class="w"><div class="wico">🔄</div><b>转行求职者</b><p>看清简历和新岗位差在哪,把可迁移能力写出来。</p></div>
+        <div class="w"><div class="wico">🚀</div><b>海投没回音的人</b><p>先搞清是不是简历的锅,别再无效海投浪费机会。</p></div>
+      </div>
+
+      <div class="sec-title">常见问题</div>
+      <div class="faq">
+        <details><summary>会保存我的简历吗?</summary><p>不会。简历只用于本次分析,服务器不存储任何简历内容,用完即弃。</p></details>
+        <details><summary>要花钱吗?</summary><p>完全免费。登录只用邮箱验证码(仅用于统计用户量),不发营销邮件、不绑定简历内容。</p></details>
+        <details><summary>诊断准不准?</summary><p>由 AI 模型基于简历与 JD 生成,作为优化参考很实用;最终投递前建议自己再核对一遍。</p></details>
+        <details><summary>支持哪些格式?</summary><p>可直接粘贴文本,也能上传 PDF 或图片(截图/拍照)自动识别文字。</p></details>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn-primary" id="cta-top-btn">↑ 现在就上传简历,开始诊断</button>
+      </div>
     </div>
   </section>
 
@@ -306,6 +512,13 @@
       <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
       <div class="band" id="band"></div>
       <p class="verdict" id="verdict"></p>
+      <div class="score-delta" id="score-delta" style="display:none"></div>
+    </div>
+
+    <div class="card" id="top3-card" style="display:none">
+      <h2>🎯 最该优先改的 3 处</h2>
+      <p class="hint" style="margin-bottom:8px">时间有限?先改这三条,分数提升最快。</p>
+      <div id="top3"></div>
     </div>
 
     <div class="card">
@@ -326,13 +539,14 @@
 
     <div class="card">
       <h2>改写示范</h2>
-      <p class="hint" style="margin-bottom:14px">挑选了最值得优化的几条经历,对照学习后可举一反三修改全文。</p>
+      <p class="hint" style="margin-bottom:14px">挑选了最值得优化的几条经历,对照学习后可举一反三修改全文。每条改写后可一键复制。</p>
       <div id="rewrites"></div>
     </div>
 
     <div class="report-actions">
       <button class="btn-primary" id="poster-btn">🖼 生成我的诊断海报</button>
       <button class="btn-ghost" id="rewrite-btn">✨ 一键生成修改版简历</button>
+      <button class="btn-ghost" id="report-interview-btn">🎤 生成模拟面试题</button>
       <button class="btn-ghost" id="back-btn">← 返回修改后再测一次</button>
     </div>
   </section>
@@ -379,14 +593,33 @@
       <h2>✨ 修改版简历</h2>
       <p class="hint" style="margin-bottom:14px">AI 只基于你的真实经历改写,不会虚构内容。<strong>下方文本可以直接点击编辑</strong>——建议把 <strong>[X]</strong> 占位符替换成真实数据、填上姓名联系方式,再导出 PDF 投递。</p>
       <pre id="rewrite-content" class="rw-output" contenteditable="true" spellcheck="false"></pre>
-      <div class="actions" style="margin-top:16px">
-        <button class="btn-primary" id="pdf-one-btn">📄 导出 PDF 简历(一页纸)</button>
-        <button class="btn-ghost" id="pdf-btn">📑 导出 PDF 简历(不限页数)</button>
+
+      <div class="field" style="margin-top:18px">
+        <label>选择排版模板 <span class="opt">每套都支持「一页纸」和「不限页数」两种导出</span></label>
+        <div id="tpl-picker" class="tpl-picker"></div>
+      </div>
+
+      <div class="actions" style="margin-top:6px">
+        <button class="btn-primary" id="pdf-one-btn">📄 用所选模板导出(一页纸)</button>
+        <button class="btn-ghost" id="pdf-btn">📑 用所选模板导出(不限页数)</button>
         <button class="btn-ghost" id="copy-btn">复制全文</button>
         <button class="btn-ghost" id="download-btn">下载 .md</button>
         <button class="btn-ghost" id="rewrite-back-btn">← 返回报告</button>
       </div>
       <p class="hint" style="margin-top:10px">一页纸版会自动压缩排版,把内容刚好放进一张 A4(应届生简历推荐);导出时会自动去掉“待你补充的信息”备注区,在弹出的打印窗口里选择“另存为 PDF”即可。</p>
+    </div>
+  </section>
+
+  <!-- ============ 模拟面试题 ============ -->
+  <section id="interview-view">
+    <div class="card">
+      <h2>🎤 模拟面试题</h2>
+      <p class="hint" style="margin-bottom:14px">根据你的简历 + 目标 JD 生成,面试前先自测一遍。每题都标了<strong>考察点</strong>和一条<strong>回答思路</strong>,右上角可单条复制。</p>
+      <div id="interview-list"></div>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn-ghost" id="iv-copy-all">复制全部题目</button>
+        <button class="btn-ghost" id="interview-back-btn">← 返回</button>
+      </div>
     </div>
   </section>
 
@@ -471,10 +704,28 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+/* 通用复制:优先 clipboard API,失败降级 execCommand */
+async function copyText(text, btn, doneLabel) {
+  const orig = btn.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = doneLabel || '✓ 已复制';
+  setTimeout(() => { btn.textContent = orig; }, 1800);
+}
+
 let lastReport = null;
+let prevScore = null; /* 新增·功能1:记录"上一次"分数,用于改写前后对比 */
 
 /* ================= 渲染报告 ================= */
 function renderReport(data) {
+  const pv = prevScore;   /* 取出上次分数后立即清空,避免下次误显示 */
+  prevScore = null;
   lastReport = data;
   $('input-panel').style.display = 'none';
   $('loading').style.display = 'none';
@@ -490,6 +741,19 @@ function renderReport(data) {
   const fill = $('meter-fill');
   fill.style.background = band.fill;
   requestAnimationFrame(() => { fill.style.width = Math.max(2, Math.min(100, data.score)) + '%'; });
+
+  /* 新增·功能1:改写前后打分对比 */
+  const deltaEl = $('score-delta');
+  if (pv != null && pv !== data.score) {
+    const diff = data.score - pv;
+    const up = diff >= 0;
+    deltaEl.style.display = 'inline-flex';
+    deltaEl.style.background = up ? 'var(--tint-good)' : 'var(--tint-critical)';
+    deltaEl.style.color = up ? 'var(--good-text)' : 'var(--critical)';
+    deltaEl.innerHTML = `上次 ${pv} 分 → 本次 ${data.score} 分 <b>${up ? '↑ 提升' : '↓ 下降'} ${Math.abs(diff)} 分</b>`;
+  } else {
+    deltaEl.style.display = 'none';
+  }
 
   $('dimensions').innerHTML = (data.dimensions || []).map(d => `
     <div class="dim-row">
@@ -513,6 +777,16 @@ function renderReport(data) {
   };
   const order = { high: 0, medium: 1, low: 2 };
   const issues = [...(data.issues || [])].sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
+
+  /* 新增·功能2:高亮最该改的 3 条(取严重度最高的前三条) */
+  const top3 = issues.slice(0, 3);
+  $('top3-card').style.display = top3.length ? 'block' : 'none';
+  $('top3').innerHTML = top3.map((i, idx) => `
+    <div class="top3-item">
+      <span class="top3-num">${idx + 1}</span>
+      <div class="top3-body"><b>${esc(i.title)}</b><span class="top3-fix">${esc(i.suggestion)}</span></div>
+    </div>`).join('');
+
   $('issues').innerHTML = issues.map(i => {
     const s = sevMap[i.severity] || sevMap.low;
     return `
@@ -526,15 +800,23 @@ function renderReport(data) {
     </div>`;
   }).join('');
 
+  /* 新增·功能3:每条改写后加"一键复制"按钮 */
   $('rewrites').innerHTML = (data.rewrites || []).map(r => `
     <div class="rw">
       <div class="rw-block rw-before"><span class="rw-tag">原文</span>${esc(r.before)}</div>
-      <div class="rw-block rw-after"><span class="rw-tag">✎ 改写后</span>${esc(r.after)}</div>
+      <div class="rw-block rw-after"><button type="button" class="rw-copy" data-copy="${esc(r.after)}">📋 复制</button><span class="rw-tag">✎ 改写后</span>${esc(r.after)}</div>
       ${r.why ? `<div class="rw-why">为什么这样改:${esc(r.why)}</div>` : ''}
     </div>`).join('');
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+/* 新增·功能3:改写示范逐条复制(事件委托) */
+$('rewrites').addEventListener('click', (e) => {
+  const btn = e.target.closest('.rw-copy');
+  if (!btn) return;
+  copyText(btn.dataset.copy, btn);
+});
 
 function showError(msg) {
   $('loading').style.display = 'none';
@@ -736,19 +1018,144 @@ $('rewrite-back-btn').addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
-$('copy-btn').addEventListener('click', async () => {
+$('copy-btn').addEventListener('click', () => {
+  copyText($('rewrite-content').textContent, $('copy-btn'), '✓ 已复制');
+});
+
+/* ================= 新增·功能5:根据 JD 的模拟面试题 ================= */
+const DEMO_INTERVIEW = {
+  questions: [
+    { category: '岗位匹配', question: '这个岗位 JD 里明确要求"数据驱动运营、会 A/B 测试",但你简历里几乎没有相关经历,你打算怎么说服我你能胜任?', focus: '考察对岗位核心要求的自我认知与自证能力', tip: '别回避。用课程项目/公众号里做过的 Excel 数据透视、转化率统计来举证,并给出你主动补的学习动作(如自学 SQL 进度)。' },
+    { category: '项目深挖', question: '你提到独立运营公众号 3 个月、把平均阅读量从 800 提到 2100,这个提升具体是怎么做到的?中间有没有失败的尝试?', focus: '验证经历真实性 + 复盘迭代能力', tip: '按 STAR 讲:先说选题测试方法,再讲一次数据不好的选题和你的调整,最后落到可复用的方法论。' },
+    { category: '专业知识', question: '如果让你为一个新上线的活动设计一次 A/B 测试,你会怎么设计?要控制哪些变量?', focus: '考察数据分析的基本功和逻辑严谨度', tip: '讲清:单一变量、对照组/实验组、样本量与周期、看什么核心指标(如转化率),以及怎么判断显著。' },
+    { category: '行为面试', question: '讲一次你和同学或同事意见不一致、但你最终推动了方案落地的经历。', focus: '考察沟通协作与推动力(STAR)', tip: '选校园活动策划里的真实分歧,重点讲你怎么用数据/用户视角说服对方,而不是谁对谁错。' },
+    { category: '职业规划', question: '你是市场营销专业,为什么想做 AI 产品运营?未来 3 年你希望成长成什么样?', focus: '考察求职动机的真诚度与稳定性', tip: '把专业背景讲成优势(懂用户、懂内容),再自然连接到你已经在用 AI 工具做运营,规划要具体、不喊口号。' },
+    { category: '压力追问', question: '你的简历里有不少 [X] 还没填的数字,如果我现在问你真实数据,你答得上来吗?', focus: '考察经历的真实性和临场反应', tip: '如实回答真实数字,答不上来的坦诚说明估算口径。切忌当场编造,面试官很容易追问穿帮。' }
+  ]
+};
+
+function renderInterview(data) {
+  ['input-panel', 'report', 'rewrite-view', 'login-view'].forEach(id => { $(id).style.display = 'none'; });
+  $('loading').style.display = 'none';
+  $('interview-view').style.display = 'block';
+  const qs = (data && data.questions) || [];
+  $('interview-list').innerHTML = qs.map((q, i) => {
+    const copyText = `Q${i + 1}【${q.category || ''}】${q.question}` +
+      (q.focus ? `\n考察点:${q.focus}` : '') +
+      (q.tip ? `\n回答思路:${q.tip}` : '');
+    return `
+    <div class="iv-q">
+      <div class="iv-head">
+        <span class="iv-cat">${esc(q.category || '面试问题')}</span>
+        <button type="button" class="rw-copy iv-copy" data-copy="${esc(copyText)}">📋 复制</button>
+      </div>
+      <div class="iv-question">Q${i + 1}. ${esc(q.question)}</div>
+      ${q.focus ? `<div class="iv-focus">🔍 考察点:${esc(q.focus)}</div>` : ''}
+      ${q.tip ? `<div class="iv-tip">💡 回答思路:${esc(q.tip)}</div>` : ''}
+    </div>`;
+  }).join('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function doInterview() {
+  if (!lastInput.resume) { renderInterview(DEMO_INTERVIEW); return; } // 演示模式:无原文直接给示范
+  const btns = [$('interview-btn'), $('report-interview-btn')].filter(Boolean);
+  const origs = btns.map(b => b.textContent);
+  btns.forEach(b => { b.disabled = true; b.textContent = '出题中…约 20-40 秒'; });
   try {
-    await navigator.clipboard.writeText($('rewrite-content').textContent);
-    $('copy-btn').textContent = '✓ 已复制';
-  } catch {
-    const r = document.createRange();
-    r.selectNodeContents($('rewrite-content'));
-    const sel = window.getSelection();
-    sel.removeAllRanges(); sel.addRange(r);
-    document.execCommand('copy');
-    $('copy-btn').textContent = '✓ 已复制';
+    const resp = await fetch('/api/interview', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(lastInput)
+    });
+    const data = await resp.json();
+    if (resp.status === 401) { handleAuthFailure(data.error); return; }
+    if (!resp.ok) throw new Error(data.error || '生成失败,请稍后重试。');
+    renderInterview(data);
+  } catch (err) {
+    alert(err.message === 'Failed to fetch' ? '无法连接服务,请稍后重试(可在演示里先体验效果)。' : err.message);
+  } finally {
+    btns.forEach((b, i) => { b.disabled = false; b.textContent = origs[i]; });
   }
-  setTimeout(() => { $('copy-btn').textContent = '复制全文'; }, 2000);
+}
+
+/* 单条复制(事件委托) */
+$('interview-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.iv-copy');
+  if (!btn) return;
+  copyText(btn.dataset.copy, btn);
+});
+
+$('iv-copy-all').addEventListener('click', () => {
+  const all = [...document.querySelectorAll('.iv-copy')].map(b => b.dataset.copy).join('\n\n');
+  copyText(all, $('iv-copy-all'), '✓ 已复制全部');
+});
+
+$('interview-back-btn').addEventListener('click', () => {
+  $('interview-view').style.display = 'none';
+  $('input-panel').style.display = 'block';
+  window.scrollTo({ top: 0 });
+});
+
+/* 报告页里的"生成模拟面试题"入口 */
+$('report-interview-btn').addEventListener('click', () => {
+  if (!lastInput.resume) { doInterview(); return; } // 演示模式无需登录
+  requireLogin(doInterview, 'report');
+});
+
+/* ================= 新增·功能4:排版模板系统 ================= */
+const TEMPLATES = {
+  classic: {
+    name: '经典蓝', desc: '蓝色标题 + 下划线,商务通用最稳妥', mini: 'm-classic',
+    css: (g) => `body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1a1a1a;}
+      h1{font-size:1.8em;text-align:center;letter-spacing:1px;margin-bottom:.15em;}
+      h1+p{text-align:center;color:#444;}
+      h2{font-size:1.14em;margin:${g};padding-bottom:.25em;border-bottom:2px solid #2a78d6;color:#1c5cab;}
+      .lead{color:#444;background:#f2f7fd;padding:.6em .9em;border-radius:6px;margin:.6em 0;}`
+  },
+  modern: {
+    name: '现代简约', desc: '深色色块标题、左对齐,互联网/科技风', mini: 'm-modern',
+    css: (g) => `body{font-family:"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;color:#222;}
+      h1{font-size:2em;text-align:left;letter-spacing:.5px;color:#111;margin-bottom:.1em;}
+      h1+p{text-align:left;color:#2a78d6;font-weight:600;}
+      h2{font-size:1.02em;margin:${g};padding:.32em .7em;background:#0b2545;color:#fff;border-radius:4px;letter-spacing:1px;}
+      .lead{color:#333;border-left:3px solid #2a78d6;padding:.3em .9em;margin:.6em 0;}`
+  },
+  minimal: {
+    name: '极简黑白', desc: '无彩色、细线条,打印清爽又省墨', mini: 'm-minimal',
+    css: (g) => `body{font-family:"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;color:#000;}
+      h1{font-size:1.7em;text-align:center;letter-spacing:4px;font-weight:600;margin-bottom:.2em;}
+      h1+p{text-align:center;color:#555;letter-spacing:1px;}
+      h2{font-size:1em;letter-spacing:2px;margin:${g};padding-bottom:.2em;border-bottom:1px solid #000;color:#000;}
+      .lead{color:#333;font-style:italic;padding:.3em 0;margin:.5em 0;}`
+  },
+  elegant: {
+    name: '雅致衬线', desc: '衬线字体 + 暖棕点缀,文职/文创更出挑', mini: 'm-elegant',
+    css: (g) => `body{font-family:Georgia,"Times New Roman","Songti SC","SimSun",serif;color:#2b2620;}
+      h1{font-size:1.9em;text-align:center;letter-spacing:1px;margin-bottom:.15em;}
+      h1+p{text-align:center;color:#8a6d3b;font-style:italic;}
+      h2{font-size:1.12em;margin:${g};padding-bottom:.25em;border-bottom:1px solid #b08d57;color:#6b4f2a;}
+      .lead{color:#4a4034;background:#faf6ef;padding:.6em .9em;border-radius:4px;margin:.6em 0;}`
+  }
+};
+let selectedTemplate = 'classic';
+
+function renderTplPicker() {
+  $('tpl-picker').innerHTML = Object.entries(TEMPLATES).map(([id, t]) => `
+    <button type="button" class="tpl-card${id === selectedTemplate ? ' active' : ''}" data-tpl="${id}">
+      <span class="tpl-mini ${t.mini}">
+        <i class="m-title"></i><i class="m-h2"></i><i class="m-line"></i><i class="m-line short"></i><i class="m-h2"></i><i class="m-line"></i>
+      </span>
+      <span class="tpl-name">${t.name}</span>
+      <span class="tpl-desc">${t.desc}</span>
+    </button>`).join('');
+}
+renderTplPicker();
+$('tpl-picker').addEventListener('click', (e) => {
+  const c = e.target.closest('.tpl-card');
+  if (!c) return;
+  selectedTemplate = c.dataset.tpl;
+  $('tpl-picker').querySelectorAll('.tpl-card').forEach(x => x.classList.toggle('active', x === c));
 });
 
 /* ---------- 导出 PDF(浏览器打印引擎生成文字版 PDF,对 ATS 友好) ---------- */
@@ -794,6 +1201,9 @@ function exportPdf(onePage) {
   const w = window.open('', '_blank');
   if (!w) { alert('浏览器拦截了弹窗,请允许本站打开新窗口后重试。'); return; }
 
+  const tpl = TEMPLATES[selectedTemplate] || TEMPLATES.classic;
+  const g = onePage ? '.7em 0 .3em' : '1em 0 .45em';
+
   // 一页纸版:相对字号排版 + 自动缩放脚本,内容超出时逐步压缩直到装进一张 A4
   const fitScript = onePage ? `
   <script>
@@ -822,18 +1232,10 @@ function exportPdf(onePage) {
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-      color:#1a1a1a; line-height:${onePage ? '1.5' : '1.65'}; font-size:13px;
+      line-height:${onePage ? '1.5' : '1.65'}; font-size:13px;
       max-width:210mm; margin:0 auto; padding:${pagePadding};
     }
-    h1 { font-size:1.8em; text-align:center; margin-bottom:0.2em; letter-spacing:1px; }
-    h1 + p { text-align:center; color:#444; }
-    h2 {
-      font-size:1.14em; margin:${onePage ? '0.7em 0 0.3em' : '1em 0 0.45em'}; padding-bottom:0.25em;
-      border-bottom:2px solid #2a78d6; color:#1c5cab;
-    }
     p { margin:0.3em 0; }
-    .lead { color:#444; background:#f2f7fd; padding:0.6em 0.9em; border-radius:6px; margin:0.6em 0; }
     ul { margin:0.3em 0 0.6em 1.4em; }
     li { margin:${onePage ? '0.15em' : '0.25em'} 0; }
     hr { border:none; border-top:1px solid #ddd; margin:0.7em 0; }
@@ -844,6 +1246,7 @@ function exportPdf(onePage) {
     }
     @media print { .overflow-note { display:none; } }
     @page { size: A4; margin: 0; }
+    ${tpl.css(g)}
   </style></head><body>${resumeMdToHtml(md)}${fitScript}</body></html>`);
   w.document.close();
 }
@@ -861,7 +1264,7 @@ $('download-btn').addEventListener('click', () => {
 });
 
 /* ================= 诊断海报(Canvas 生成,含二维码) ================= */
-const QR_B64 = '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';
+const QR_B64 = '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';
 
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -928,7 +1331,6 @@ async function buildPoster() {
   ctx.fillStyle = NAVY; ctx.font = `800 ${128 * S}px ${FONT}`;
   ctx.fillText(String(d.score), W / 2 - 30 * S, 356 * S);
   ctx.fillStyle = LIGHT; ctx.font = `${28 * S}px ${FONT}`;
-  const sw = ctx.measureText(String(d.score)).width;
   ctx.textAlign = 'left';
   ctx.fillText('/100', W / 2 + 40 * S, 356 * S);
   ctx.textAlign = 'center';
@@ -1054,7 +1456,7 @@ function renderAuthStatus() {
 
 function showLogin(returnView) {
   loginReturnView = returnView || 'input-panel';
-  ['input-panel', 'report', 'rewrite-view'].forEach(id => { $(id).style.display = 'none'; });
+  ['input-panel', 'report', 'rewrite-view', 'interview-view'].forEach(id => { $(id).style.display = 'none'; });
   $('loading').style.display = 'none';
   $('login-view').style.display = 'block';
   $('login-msg').textContent = '';
@@ -1164,24 +1566,70 @@ async function runAnalysis() {
   }
 }
 
+/* 读取并校验主页输入,写入 lastInput;返回 {resume, jd} 或 null */
+function readHomeInputs() {
+  const resume = $('resume').value.trim();
+  const jd = $('jd').value.trim();
+  $('error').style.display = 'none';
+  if (resume.length > MAX_LEN || jd.length > MAX_LEN) {
+    showError('内容超过 8000 字上限,请精简后重试。');
+    return null;
+  }
+  lastInput = { resume, jd };
+  return { resume, jd };
+}
+
 $('analyze-btn').addEventListener('click', () => {
   const resume = $('resume').value.trim();
   const jd = $('jd').value.trim();
   $('error').style.display = 'none';
 
-  if (resume.length < 50) return showError('简历内容太短了(至少 50 字),请粘贴完整的简历文本。');
+  if (resume.length < 50) return showError('简历内容太短了(至少 50 字),请粘贴完整的简历文本;想先看看效果可以点"查看演示"。');
   if (resume.length > MAX_LEN || jd.length > MAX_LEN) return showError('内容超过 8000 字上限,请精简后重试。');
 
   lastInput = { resume, jd };
   requireLogin(runAnalysis, 'input-panel');
 });
 
+/* 主页入口·直接改写 + 选模板(留空则进演示) */
+$('rewrite-direct-btn').addEventListener('click', () => {
+  const v = readHomeInputs();
+  if (!v) return;
+  if (!v.resume) { doRewrite(); return; }        // 演示模式,无需登录
+  requireLogin(doRewrite, 'input-panel');
+});
+
+/* 主页入口·模拟面试题(留空则进演示) */
+$('interview-btn').addEventListener('click', () => {
+  const v = readHomeInputs();
+  if (!v) return;
+  if (!v.resume) { doInterview(); return; }       // 演示模式,无需登录
+  requireLogin(doInterview, 'input-panel');
+});
+
+/* 首页功能卡点击 = 触发对应入口按钮 */
+document.querySelectorAll('.feat-card[data-act]').forEach(card => {
+  card.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const btn = $(card.dataset.act);
+    if (btn) setTimeout(() => btn.click(), 350);
+  });
+});
+
 renderAuthStatus();
 
 /* ================= 事件 ================= */
-$('demo-btn').addEventListener('click', () => { lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
+$('demo-btn').addEventListener('click', () => { prevScore = null; lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
+
+/* 首页营销区底部 CTA:回到顶部并聚焦简历输入框 */
+$('cta-top-btn').addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => $('resume').focus(), 400);
+});
 
 $('back-btn').addEventListener('click', () => {
+  /* 新增·功能1:离开报告去"再测一次"前,记住本次分数,下次出报告时对比 */
+  prevScore = lastReport ? lastReport.score : null;
   $('report').style.display = 'none';
   $('rewrite-view').style.display = 'none';
   $('input-panel').style.display = 'block';
