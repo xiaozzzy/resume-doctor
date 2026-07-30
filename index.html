@@ -390,6 +390,32 @@
   .tpl-mini.m-elegant { font-family: Georgia, serif; }
   .tpl-mini.m-elegant .m-title { background: #6b4f2a; }
   .tpl-mini.m-elegant .m-h2 { background: #b08d57; }
+  .tpl-mini.m-sidebar { padding-left: 8px; border-left: 8px solid #0b2545; }
+  .tpl-mini.m-sidebar .m-title { width: 42%; margin-left: 0; background: #0b2545; }
+  .tpl-mini.m-sidebar .m-h2 { width: 56%; background: #2a78d6; }
+  .tpl-mini.m-terminal { background: #111827; border-color: #25324a; }
+  .tpl-mini.m-terminal i { background: #6ee7b7; opacity: .9; }
+  .tpl-mini.m-terminal .m-title { width: 64%; margin-left: 0; background: #f8fafc; }
+  .tpl-mini.m-terminal .m-h2 { width: 48%; background: #34d399; }
+  .tpl-mini.m-coral .m-title { background: #d95d4f; width: 58%; }
+  .tpl-mini.m-coral .m-h2 { background: #f29f8f; width: 48%; }
+  .tpl-mini.m-timeline { padding-left: 14px; border-left: 2px solid #d95d4f; }
+  .tpl-mini.m-timeline .m-title { width: 46%; margin-left: 0; background: #2f5d50; }
+  .tpl-mini.m-timeline .m-h2 { width: 34%; margin-left: 0; background: #d95d4f; }
+
+  .showcase-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .showcase-card {
+    display: flex; flex-direction: column; gap: 9px; text-align: left;
+    width: 100%; padding: 12px; background: var(--surface); color: var(--ink-1);
+    border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .showcase-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 22px -12px rgba(42,120,214,.45); }
+  .showcase-card .tpl-mini { width: 100%; }
+  .showcase-card .tpl-name { font-size: 13px; }
+  .showcase-card .tpl-desc { min-height: 34px; }
+  @media (max-width: 720px) { .showcase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 420px) { .showcase-grid { grid-template-columns: 1fr; } }
 
   /* ---------- 截图版首页营销板块 ---------- */
   .landing { margin-top: 6px; }
@@ -524,7 +550,7 @@
         <div class="feat-card" data-act="rewrite-direct-btn">
           <div class="feat-ico">📄</div>
           <h3>多模板一键导出 <span class="badge-new">新增</span></h3>
-          <p>挑一套排版模板(共 4 套),一页纸 / 不限页数直接导出 PDF。</p>
+          <p>挑一套排版模板(共 8 套),一页纸 / 不限页数直接导出 PDF。</p>
           <span class="feat-go">点这里直接改写 →</span>
         </div>
         <div class="feat-card" data-act="interview-btn">
@@ -550,6 +576,10 @@
 
       <div class="sec-title">五个维度,像体检一样</div>
       <div class="sec-sub">哪块"生病"了、该先治哪里,报告里说得清清楚楚</div>
+      <div class="sec-title">简历模板展示</div>
+      <div class="sec-sub">先看风格,再选择版式。每套模板都支持一页纸和不限页数导出。</div>
+      <div id="template-showcase" class="showcase-grid"></div>
+
       <div class="dim5">
         <div class="d5"><div class="d5-ico">🎯</div><b>岗位匹配度</b><p>简历和目标 JD 的核心要求对不对得上。</p></div>
         <div class="d5"><div class="d5-ico">📊</div><b>量化程度</b><p>有没有用数字说话,而不是只写"负责""参与"。</p></div>
@@ -1381,6 +1411,38 @@ const TEMPLATES = {
       h1+p{text-align:center;color:#8a6d3b;font-style:italic;}
       h2{font-size:1.12em;margin:${g};padding-bottom:.25em;border-bottom:1px solid #b08d57;color:#6b4f2a;}
       .lead{color:#4a4034;background:#faf6ef;padding:.6em .9em;border-radius:4px;margin:.6em 0;}`
+  },
+  sidebar: {
+    name: '侧栏蓝灰', desc: '左侧信息栏 + 内容区,产品/运营岗更清晰', mini: 'm-sidebar',
+    css: (g) => `body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#20324a;border-left:12px solid #0b2545;padding-left:18px;}
+      h1{font-size:1.8em;text-align:left;color:#0b2545;margin-bottom:.15em;}
+      h1+p{text-align:left;color:#2a78d6;font-weight:600;}
+      h2{font-size:1.08em;margin:${g};padding:.22em .65em;border-left:4px solid #2a78d6;background:#eef4fd;color:#0b2545;}
+      .lead{color:#334155;border-left:3px solid #93c5fd;padding:.3em .9em;margin:.6em 0;}`
+  },
+  terminal: {
+    name: '数据终端', desc: '等宽字体 + 标签化层级,技术/数据岗适用', mini: 'm-terminal',
+    css: (g) => `body{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;color:#d1fae5;background:#111827;padding:1.4em 1.6em;}
+      h1{font-size:1.65em;text-align:left;color:#f8fafc;margin-bottom:.15em;}
+      h1+p{text-align:left;color:#6ee7b7;}
+      h2{font-size:1em;margin:${g};padding:.3em .6em;background:#1f2937;border-left:3px solid #34d399;color:#6ee7b7;}
+      p,li{color:#d1d5db;}`
+  },
+  coral: {
+    name: '活力珊瑚', desc: '珊瑚强调 + 轻量圆角,市场/品牌岗更有记忆点', mini: 'm-coral',
+    css: (g) => `body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#3b2927;}
+      h1{font-size:1.9em;text-align:left;color:#3b2927;margin-bottom:.15em;}
+      h1+p{text-align:left;color:#d95d4f;font-weight:700;}
+      h2{font-size:1.08em;margin:${g};padding:.28em .75em;border-radius:999px;background:#fff0ed;color:#b84438;}
+      .lead{color:#633b36;background:#fff5f2;padding:.65em .9em;border-radius:10px;margin:.6em 0;}`
+  },
+  timeline: {
+    name: '时间轴绿', desc: '经历节点更突出,适合项目多、经历丰富的简历', mini: 'm-timeline',
+    css: (g) => `body{font-family:"Avenir Next",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;color:#263c35;}
+      h1{font-size:1.85em;text-align:left;color:#2f5d50;margin-bottom:.15em;}
+      h1+p{text-align:left;color:#d95d4f;font-weight:600;}
+      h2{font-size:1.08em;margin:${g};padding:.22em 0 .22em .7em;border-left:4px solid #d95d4f;border-bottom:1px solid #d6e5dc;color:#2f5d50;}
+      p,li{line-height:1.7;}`
   }
 };
 let selectedTemplate = 'classic';
@@ -1396,11 +1458,31 @@ function renderTplPicker() {
     </button>`).join('');
 }
 renderTplPicker();
+function renderTemplateShowcase() {
+  const host = $('template-showcase');
+  if (!host) return;
+  host.innerHTML = Object.entries(TEMPLATES).map(([id, t]) => `
+    <button type="button" class="showcase-card" data-showcase-tpl="${id}">
+      <span class="tpl-mini ${t.mini}">
+        <i class="m-title"></i><i class="m-h2"></i><i class="m-line"></i><i class="m-line short"></i><i class="m-h2"></i><i class="m-line"></i>
+      </span>
+      <span class="tpl-name">${t.name}</span>
+      <span class="tpl-desc">${t.desc}</span>
+    </button>`).join('');
+}
+renderTemplateShowcase();
 $('tpl-picker').addEventListener('click', (e) => {
   const c = e.target.closest('.tpl-card');
   if (!c) return;
   selectedTemplate = c.dataset.tpl;
   $('tpl-picker').querySelectorAll('.tpl-card').forEach(x => x.classList.toggle('active', x === c));
+});
+const showcase = $('template-showcase');
+if (showcase) showcase.addEventListener('click', (e) => {
+  const c = e.target.closest('[data-showcase-tpl]');
+  if (!c) return;
+  selectedTemplate = c.dataset.showcaseTpl;
+  $('rewrite-direct-btn').click();
 });
 
 /* ---------- 导出 PDF(浏览器打印引擎生成文字版 PDF,对 ATS 友好) ---------- */
