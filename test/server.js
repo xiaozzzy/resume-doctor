@@ -60,6 +60,7 @@ XX科技有限公司 产品运营 2023.06-至今
 自我评价:工作认真负责,有责任心。`;
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
+let MOCK_APPLICATIONS = [];
 
 function json(res, code, obj) {
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -108,6 +109,15 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/stats') {
     json(res, 200, { users: 12, analyses: 34, rewrites: 8 });
     return;
+  }
+  if (p === '/api/applications') {
+    if (req.method === 'GET') { json(res, 200, { records: MOCK_APPLICATIONS }); return; }
+    if (req.method === 'POST') {
+      const b = await readBody(req);
+      MOCK_APPLICATIONS = Array.isArray(b.records) ? b.records : [];
+      json(res, 200, { ok: true, count: MOCK_APPLICATIONS.length });
+      return;
+    }
   }
 
   // 静态文件

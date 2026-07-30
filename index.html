@@ -51,36 +51,36 @@
     line-height: 1.6;
     min-height: 100vh;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 26px 20px 64px; }
 
   /* ---------- 顶部"完全免费"横幅 ---------- */
   .free-banner {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    max-width: 520px; margin: 0 auto 22px;
-    background: linear-gradient(135deg, var(--accent), #7c5cff);
-    color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.3px;
-    border-radius: 999px; padding: 10px 22px;
-    box-shadow: 0 8px 22px -8px rgba(42,120,214,0.55);
+    max-width: 390px; margin: 0 auto 14px;
+    background: #eaf3ff; border: 1px solid #d6e9ff;
+    color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: 0;
+    border-radius: 999px; padding: 6px 14px;
+    box-shadow: none;
   }
-  .free-banner .fb-sub { font-size: 12px; font-weight: 500; opacity: 0.92; }
+  .free-banner .fb-sub { font-size: 12px; font-weight: 500; opacity: 0.82; }
   @media (max-width: 480px) {
     .free-banner { flex-direction: column; gap: 2px; padding: 10px 16px; }
   }
 
   /* ---------- header ---------- */
-  header { text-align: center; margin-bottom: 30px; }
-  .logo { font-size: 34px; font-weight: 800; letter-spacing: 0.5px; }
+  header { text-align: center; margin-bottom: 18px; }
+  .logo { font-size: 31px; font-weight: 800; letter-spacing: 0; }
   .logo .plus {
     background: linear-gradient(135deg, var(--accent), #7c5cff);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .tagline { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
+  .tagline { color: var(--ink-2); margin-top: 4px; font-size: 14px; }
   #auth-status a { color: var(--ink-3); }
 
   /* ---------- steps strip ---------- */
   .steps {
     display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
-    margin: 18px 0 26px; font-size: 13px; color: var(--ink-2);
+    margin: 12px 0 18px; font-size: 13px; color: var(--ink-2);
   }
   .step {
     display: inline-flex; align-items: center; gap: 7px;
@@ -146,10 +146,13 @@
   }
   .btn-mini:hover { background: var(--accent-track); }
   .btn-mini:disabled { opacity: 0.5; cursor: wait; }
-  .counter { font-size: 12px; color: var(--ink-3); text-align: right; margin-top: 4px; }
+  .counter { display: flex; justify-content: flex-end; width: 100%; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
   .counter.over { color: var(--critical); }
 
   .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .main-actions { margin-top: 18px; gap: 10px; }
+  .main-actions .btn-primary { min-width: 122px; }
+  .main-actions button { min-width: 0; padding: 10px 14px; font-size: 14px; white-space: nowrap; }
   button {
     font-family: inherit;
     font-size: 15px;
@@ -169,6 +172,66 @@
   .btn-ghost { background: var(--surface); color: var(--ink-2); border-color: var(--hairline); transition: background 0.15s ease; }
   .btn-ghost:hover { background: var(--page); }
   .privacy { font-size: 12px; color: var(--ink-3); margin-top: 12px; }
+
+  /* ---------- 求职闭环入口与投递管理 ---------- */
+  .target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .target-grid .field { margin-bottom: 0; }
+  .input-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 24px; align-items: stretch; }
+  .input-layout > * { min-width: 0; }
+  .input-resume { margin-bottom: 0; padding-right: 24px; border-right: 1px solid var(--hairline); }
+  .input-resume textarea { min-height: 266px; }
+  .input-target { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 7px; min-height: 0; }
+  .input-jd { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; margin-bottom: 0; }
+  .input-jd textarea { height: calc(100% - 6px); min-height: 0 !important; }
+  .field-head { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; align-items: center !important; width: 100%; margin-bottom: 6px !important; }
+  .field-head .btn-mini { justify-self: end; }
+  .field-hint { margin: 0 0 10px; color: var(--ink-3); font-size: 12px; }
+  .target-section-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; width: 100%; gap: 12px; }
+  .target-section-head h3 { font-size: 15px; }
+  .target-section-head span { color: var(--ink-3); font-size: 12px; }
+  .target-grid label { display: block; width: 100%; font-size: 13px; margin-bottom: 4px; }
+  .target-grid .txt { padding: 8px 11px; }
+  .workflow-card { padding: 20px; }
+  .workflow-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .workflow-head h2 { margin-bottom: 0; }
+  .workflow-head p { font-size: 12px; color: var(--ink-3); }
+  .workflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .workflow-item { padding: 16px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--page); }
+  .workflow-item .wf-icon { font-size: 23px; }
+  .workflow-item h3 { font-size: 15px; margin: 7px 0 4px; }
+  .workflow-item p { min-height: 42px; color: var(--ink-2); font-size: 12px; line-height: 1.6; }
+  .workflow-item button { width: 100%; margin-top: 12px; padding: 9px 10px; font-size: 13px; }
+  .tracker-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tracker-count { color: var(--ink-3); font-size: 13px; }
+  .app-list { display: grid; gap: 10px; }
+  .app-empty { padding: 22px; text-align: center; color: var(--ink-3); border: 1px dashed var(--hairline); border-radius: 10px; font-size: 13px; }
+  .app-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--page); }
+  .app-item strong { display: block; font-size: 14px; }
+  .app-meta { color: var(--ink-3); font-size: 12px; margin-top: 3px; }
+  .status { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; background: var(--accent-track); color: var(--accent); font-size: 12px; font-weight: 700; }
+  .app-actions { display: flex; align-items: center; gap: 8px; }
+  .btn-text { padding: 5px 8px; border: 0; background: transparent; color: var(--accent); font-size: 12px; }
+  .offer-checklist { display: grid; gap: 9px; margin-top: 16px; }
+  .offer-check { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--page); font-size: 13px; color: var(--ink-2); cursor: pointer; }
+  .offer-check input { margin-top: 3px; accent-color: var(--accent); }
+  .offer-check b { display: block; color: var(--ink-1); margin-bottom: 2px; }
+  .offer-questions { margin-top: 16px; padding: 14px; background: var(--tint-warning); border-radius: 10px; color: var(--ink-2); font-size: 13px; }
+  .offer-questions h3 { color: var(--ink-1); font-size: 14px; margin-bottom: 7px; }
+  .offer-questions li { margin: 4px 0 4px 18px; }
+  @media (max-width: 720px) {
+    .input-layout { grid-template-columns: 1fr; }
+    .input-resume { margin-bottom: 0; padding-right: 0; padding-bottom: 16px; border-right: 0; border-bottom: 1px solid var(--hairline); }
+    .input-resume textarea { min-height: 180px; }
+    .input-target { display: flex; gap: 16px; }
+    .input-jd textarea { min-height: 156px !important; }
+    .main-actions { gap: 10px; }
+    .main-actions button { padding: 10px 13px; font-size: 14px; }
+  }
+  @media (max-width: 560px) {
+    .target-grid, .workflow-grid { grid-template-columns: 1fr; }
+    .workflow-item p { min-height: auto; }
+    .app-item { grid-template-columns: 1fr; }
+  }
 
   /* ---------- loading ---------- */
   #loading { display: none; text-align: center; padding: 40px 0; }
@@ -332,11 +395,11 @@
   .landing { margin-top: 6px; }
   .sec-title { text-align: center; font-size: 21px; font-weight: 800; margin: 38px 0 6px; }
   .sec-sub { text-align: center; color: var(--ink-3); font-size: 14px; margin-bottom: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
-  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 14px; }
-  .feat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: 0 1px 2px rgba(11,11,11,0.04); }
-  .feat-ico { font-size: 26px; }
-  .feat-card h3 { font-size: 15px; margin: 8px 0 6px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-  .feat-card p { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+  .feat-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .feat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 15px; box-shadow: 0 1px 2px rgba(11,11,11,0.04); }
+  .feat-ico { font-size: 23px; }
+  .feat-card h3 { font-size: 14px; margin: 7px 0 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .feat-card p { font-size: 12px; color: var(--ink-2); line-height: 1.55; }
   .badge-new { font-size: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), #7c5cff); border-radius: 999px; padding: 1px 8px; letter-spacing: 0.5px; }
   .ba-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
   @media (max-width: 560px) { .ba-demo { grid-template-columns: 1fr; } }
@@ -364,13 +427,16 @@
   .faq p { font-size: 13px; color: var(--ink-2); padding: 0 0 14px 24px; line-height: 1.75; }
   .cta-row { text-align: center; margin: 30px 0 4px; }
 
+  @media (max-width: 720px) { .feat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 420px) { .feat-grid { grid-template-columns: 1fr; } }
+
   footer { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 40px; }
   footer a { color: var(--ink-3); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="free-banner">🎁 功能完全免费 <span class="fb-sub">· 无广告 · 不存储简历</span></div>
+  <div class="free-banner">🎁 功能完全免费 <span class="fb-sub">· 无广告 · 本地记录，登录后可同步</span></div>
   <header>
     <div class="logo">简历医生<span class="plus"> +</span></div>
     <p class="tagline">粘贴简历和目标岗位 JD,30 秒生成一份 AI 诊断报告</p>
@@ -381,38 +447,55 @@
   <!-- ============ 输入区 ============ -->
   <section id="input-panel">
     <div class="steps">
-      <span class="step"><b>1</b> 粘贴/上传简历</span>
+      <span class="step"><b>1</b> 简历诊断</span>
       <span class="step-arrow">→</span>
-      <span class="step"><b>2</b> 30 秒 AI 诊断</span>
+      <span class="step"><b>2</b> 按 JD 改写</span>
       <span class="step-arrow">→</span>
-      <span class="step"><b>3</b> 一键生成修改版</span>
+      <span class="step"><b>3</b> 记录投递</span>
+      <span class="step-arrow">→</span>
+      <span class="step"><b>4</b> 模拟面试</span>
+      <span class="step-arrow">→</span>
+      <span class="step"><b>5</b> Offer 核验</span>
     </div>
     <div class="card">
-      <div class="field">
-        <label>简历内容
-          <button class="btn-mini" id="resume-pdf-btn" type="button">📄 上传 PDF / 图片</button>
-          <span class="opt">建议先删除手机号、住址等隐私信息</span>
-        </label>
-        <input type="file" id="resume-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
-        <textarea id="resume" placeholder="把简历全文粘贴到这里,或点击上方“上传 PDF / 图片”自动读取……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
-        <div class="counter"><span id="resume-count">0</span> / 8000</div>
+      <div class="input-layout">
+        <div class="field input-resume">
+          <label class="field-head">简历内容 <button class="btn-mini" id="resume-pdf-btn" type="button">📄 上传 PDF / 图片</button></label>
+          <p class="field-hint">建议先隐藏手机号、住址等敏感信息</p>
+          <input type="file" id="resume-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
+          <textarea id="resume" placeholder="把简历全文粘贴到这里,或点击上方“上传 PDF / 图片”自动读取……&#10;&#10;例如:&#10;教育背景:XX大学 市场营销 2022-2026&#10;实习经历:XX公司 运营实习生&#10;· 负责公众号内容运营……"></textarea>
+          <div class="counter"><span id="resume-count">0</span> / 8000</div>
+        </div>
+        <div class="input-target">
+          <div class="target-section-head"><h3>应聘目标</h3><button class="btn-mini" id="jd-pdf-btn" type="button">📄 上传 PDF / 图片</button></div>
+          <div class="target-grid">
+            <div class="field"><label>公司名称</label><input id="company" class="txt" maxlength="80" placeholder="例如：字节跳动"></div>
+            <div class="field"><label>岗位名称</label><input id="job-title" class="txt" maxlength="80" placeholder="例如：产品运营实习生"></div>
+          </div>
+          <div class="field input-jd">
+            <label>目标岗位 JD <span class="opt">选填</span></label>
+            <input type="file" id="jd-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
+            <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,或上传 JD 截图自动识别……"></textarea>
+            <div class="counter"><span id="jd-count">0</span> / 8000</div>
+          </div>
+        </div>
       </div>
-      <div class="field">
-        <label>目标岗位 JD
-          <button class="btn-mini" id="jd-pdf-btn" type="button">📄 上传 PDF / 图片</button>
-          <span class="opt">选填 — 不填则做通用体检</span>
-        </label>
-        <input type="file" id="jd-pdf" accept=".pdf,application/pdf,image/png,image/jpeg,image/webp" style="display:none">
-        <textarea id="jd" style="min-height:120px" placeholder="把目标岗位的职位描述(JD)粘贴到这里,或上传 JD 截图自动识别……"></textarea>
-        <div class="counter"><span id="jd-count">0</span> / 8000</div>
-      </div>
-      <div class="actions">
+      <div class="actions main-actions">
         <button class="btn-primary" id="analyze-btn">🩺 开始诊断</button>
         <button class="btn-ghost" id="rewrite-direct-btn">✨ 直接改写 + 选模板</button>
         <button class="btn-ghost" id="interview-btn">🎤 生成模拟面试题</button>
         <button class="btn-ghost" id="demo-btn">👀 查看演示</button>
       </div>
-      <p class="privacy">🔒 你的简历仅用于本次分析,服务器不存储任何内容。上面三个功能都可以直接用——先粘贴简历(想做面试题/精准诊断的话再填上 JD)。</p>
+      <p class="privacy">🔒 简历只用于本次 AI 分析；投递记录默认保存在此设备。登录并部署云端存储后，仅同步公司、岗位、进度等求职记录，不同步简历原文。</p>
+    </div>
+
+    <div class="card workflow-card">
+      <div class="workflow-head"><h2>诊断后，你还能继续做什么</h2><p>围绕当前公司和岗位持续推进</p></div>
+      <div class="workflow-grid">
+        <div class="workflow-item"><div class="wf-icon">🎤</div><h3>模拟面试</h3><p>基于简历和 JD 生成问题、考察点与回答思路。</p><button class="btn-primary" id="workflow-interview-btn">开始模拟面试 →</button></div>
+        <div class="workflow-item"><div class="wf-icon">🗂</div><h3>记录投递</h3><p>保存公司、岗位、状态和下一步提醒，集中查看进度。</p><button class="btn-primary" id="workflow-applications-btn">开始记录投递 →</button></div>
+        <div class="workflow-item"><div class="wf-icon">✓</div><h3>Offer 核验</h3><p>在签约前核对薪资、试用期、社保和入职条件。</p><button class="btn-primary" id="workflow-offer-btn">开始 Offer 核验 →</button></div>
+      </div>
     </div>
 
     <!-- ====== 截图版营销板块 ====== -->
@@ -620,6 +703,48 @@
         <button class="btn-ghost" id="iv-copy-all">复制全部题目</button>
         <button class="btn-ghost" id="interview-back-btn">← 返回</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ 投递记录 ============ -->
+  <section id="applications-view" style="display:none">
+    <div class="card">
+      <h2>🗂 投递记录</h2>
+      <p class="hint" style="margin-bottom:16px">记录保存在当前设备。登录并配置云端存储后，会同步公司、岗位和进度，不会同步简历原文。</p>
+      <div class="target-grid">
+        <div class="field"><label>公司名称</label><input id="app-company" class="txt" maxlength="80" placeholder="公司名称"></div>
+        <div class="field"><label>岗位名称</label><input id="app-job-title" class="txt" maxlength="80" placeholder="岗位名称"></div>
+        <div class="field"><label>当前状态</label><select id="app-status" class="txt"><option>已投递</option><option>笔试中</option><option>一面</option><option>二面</option><option>Offer</option><option>已结束</option></select></div>
+        <div class="field"><label>投递日期</label><input id="app-date" class="txt" type="date"></div>
+      </div>
+      <div class="field"><label>备注 / 下一步提醒 <span class="opt">选填</span></label><input id="app-note" class="txt" maxlength="200" placeholder="例如：8 月 5 日前跟进 HR"></div>
+      <div class="actions"><button class="btn-primary" id="save-application-btn">保存本次投递</button><button class="btn-ghost" id="applications-back-btn">← 返回主页</button></div>
+    </div>
+    <div class="card">
+      <div class="tracker-toolbar"><h2 style="margin:0">我的投递</h2><span id="applications-count" class="tracker-count"></span></div>
+      <div id="applications-list" class="app-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ Offer 核验 ============ -->
+  <section id="offer-view" style="display:none">
+    <div class="card">
+      <h2>✓ Offer 核验清单</h2>
+      <p class="hint">签约前把关键信息写下来再确认。清单会保存在当前设备，避免只凭口头承诺做决定。</p>
+      <div class="target-grid" style="margin-top:16px">
+        <div class="field"><label>公司名称</label><input id="offer-company" class="txt" maxlength="80" placeholder="公司名称"></div>
+        <div class="field"><label>岗位名称</label><input id="offer-job-title" class="txt" maxlength="80" placeholder="岗位名称"></div>
+      </div>
+      <div class="offer-checklist" id="offer-checklist">
+        <label class="offer-check"><input type="checkbox" data-check="salary"><span><b>薪资结构与发薪规则</b>月薪、年终、绩效、补贴、试用期工资和发薪日期是否书面明确。</span></label>
+        <label class="offer-check"><input type="checkbox" data-check="probation"><span><b>试用期与转正标准</b>试用期时长、转正条件、试用期解除规则是否合规且写清。</span></label>
+        <label class="offer-check"><input type="checkbox" data-check="social"><span><b>社保、公积金与个税</b>缴纳基数、缴纳城市、入职当月是否缴纳需要确认。</span></label>
+        <label class="offer-check"><input type="checkbox" data-check="hours"><span><b>工时、加班与休假</b>工作地点、出勤制度、加班补偿、年假和调休规则是否明确。</span></label>
+        <label class="offer-check"><input type="checkbox" data-check="contract"><span><b>合同主体与限制条款</b>签约主体、合同期限、竞业/保密、违约金及其他限制性条款需要看原文。</span></label>
+      </div>
+      <div class="offer-questions"><h3>可以直接问 HR</h3><ul><li>请确认薪资构成中固定部分、绩效部分和年终奖的计算及发放规则。</li><li>试用期工资、社保公积金缴纳基数和转正标准会写入 Offer 或劳动合同吗？</li><li>入职时间、工作地点、汇报对象和工时制度是否可以在邮件中确认？</li></ul></div>
+      <div class="actions" style="margin-top:16px"><button class="btn-primary" id="save-offer-btn">保存核验进度</button><button class="btn-ghost" id="offer-back-btn">← 返回主页</button></div>
+      <p id="offer-save-note" class="hint" style="margin-top:10px"></p>
     </div>
   </section>
 
@@ -948,7 +1073,7 @@ bindFileUpload('resume-pdf-btn', 'resume-pdf', 'resume', 'resume-count');
 bindFileUpload('jd-pdf-btn', 'jd-pdf', 'jd', 'jd-count');
 
 /* ================= 一键生成修改版简历 ================= */
-let lastInput = { resume: '', jd: '' };
+let lastInput = { resume: '', jd: '', company: '', jobTitle: '' };
 
 const DEMO_REWRITE = `# [姓名]
 
@@ -1095,6 +1220,126 @@ $('interview-back-btn').addEventListener('click', () => {
   $('interview-view').style.display = 'none';
   $('input-panel').style.display = 'block';
   window.scrollTo({ top: 0 });
+});
+
+/* ================= 投递记录与 Offer 核验(本地优先) ================= */
+const APPLICATIONS_KEY = 'rd_applications_v1';
+const OFFER_KEY = 'rd_offer_checks_v1';
+
+function readLocal(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key) || '') || fallback; } catch { return fallback; }
+}
+function writeLocal(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+}
+function todayIso() { return new Date().toISOString().slice(0, 10); }
+function currentTarget() {
+  return { company: $('company').value.trim(), jobTitle: $('job-title').value.trim() };
+}
+function showHomeFrom(viewId) {
+  $(viewId).style.display = 'none';
+  $('input-panel').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function openApplications() {
+  ['input-panel', 'report', 'rewrite-view', 'interview-view', 'offer-view', 'login-view'].forEach(id => { $(id).style.display = 'none'; });
+  const target = currentTarget();
+  $('app-company').value = target.company;
+  $('app-job-title').value = target.jobTitle;
+  $('app-date').value = todayIso();
+  $('applications-view').style.display = 'block';
+  renderApplications();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function applications() { return readLocal(APPLICATIONS_KEY, []); }
+function renderApplications() {
+  const rows = applications();
+  $('applications-count').textContent = rows.length ? `共 ${rows.length} 条记录` : '还没有投递记录';
+  $('applications-list').innerHTML = rows.length ? rows.map(item => `
+    <div class="app-item"><div><strong>${esc(item.company)} · ${esc(item.jobTitle)}</strong>
+      <div class="app-meta">${esc(item.date)}${item.note ? ` · ${esc(item.note)}` : ''}</div></div>
+      <div class="app-actions"><span class="status">${esc(item.status)}</span><button class="btn-text" data-offer-id="${esc(item.id)}">核验 Offer</button><button class="btn-text" data-delete-id="${esc(item.id)}">删除</button></div>
+    </div>`).join('') : '<div class="app-empty">还没有投递记录。填写公司和岗位后保存，面试与 Offer 进度就不会散在聊天记录里。</div>';
+}
+async function syncApplications(records) {
+  if (!authToken) return;
+  try {
+    await fetch('/api/applications', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ records, offers: readLocal(OFFER_KEY, {}) }) });
+  } catch { /* 离线或尚未部署云端存储时保留本地记录 */ }
+}
+async function hydrateCloudApplications() {
+  if (!authToken) return;
+  try {
+    const resp = await fetch('/api/applications', { headers: authHeaders() });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const cloud = Array.isArray(data.records) ? data.records : [];
+    const cloudOffers = data.offers && typeof data.offers === 'object' ? data.offers : {};
+    const local = applications();
+    const known = new Set(cloud.map(item => item.id));
+    const merged = [...cloud, ...local.filter(item => !known.has(item.id))].slice(0, 200);
+    writeLocal(APPLICATIONS_KEY, merged);
+    writeLocal(OFFER_KEY, { ...cloudOffers, ...readLocal(OFFER_KEY, {}) });
+    if (local.length) syncApplications(merged);
+    if ($('applications-view').style.display !== 'none') renderApplications();
+  } catch { /* 网络不可用时继续使用本地记录 */ }
+}
+function saveApplication() {
+  const company = $('app-company').value.trim();
+  const jobTitle = $('app-job-title').value.trim();
+  if (!company || !jobTitle) { alert('请填写公司名称和岗位名称。'); return; }
+  const records = applications();
+  records.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, company, jobTitle, status: $('app-status').value, date: $('app-date').value || todayIso(), note: $('app-note').value.trim() });
+  writeLocal(APPLICATIONS_KEY, records);
+  syncApplications(records);
+  $('company').value = company; $('job-title').value = jobTitle;
+  $('app-note').value = '';
+  renderApplications();
+}
+function openOffer(target) {
+  ['input-panel', 'report', 'rewrite-view', 'interview-view', 'applications-view', 'login-view'].forEach(id => { $(id).style.display = 'none'; });
+  const current = target || currentTarget();
+  $('offer-company').value = current.company || '';
+  $('offer-job-title').value = current.jobTitle || '';
+  const saved = readLocal(OFFER_KEY, {});
+  const key = `${current.company || ''}|${current.jobTitle || ''}`;
+  $('offer-checklist').querySelectorAll('input').forEach(box => { box.checked = Boolean(saved[key] && saved[key].checks && saved[key].checks[box.dataset.check]); });
+  $('offer-save-note').textContent = '';
+  $('offer-view').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function saveOffer() {
+  const company = $('offer-company').value.trim();
+  const jobTitle = $('offer-job-title').value.trim();
+  if (!company || !jobTitle) { alert('请填写公司名称和岗位名称，方便区分不同 Offer。'); return; }
+  const saved = readLocal(OFFER_KEY, {});
+  const key = `${company}|${jobTitle}`;
+  saved[key] = { company, jobTitle, updatedAt: new Date().toISOString(), checks: {} };
+  $('offer-checklist').querySelectorAll('input').forEach(box => { saved[key].checks[box.dataset.check] = box.checked; });
+  writeLocal(OFFER_KEY, saved);
+  syncApplications(applications());
+  $('company').value = company; $('job-title').value = jobTitle;
+  $('offer-save-note').textContent = '已保存到当前设备。';
+}
+
+['workflow-applications-btn'].forEach(id => $(id).addEventListener('click', openApplications));
+['workflow-offer-btn'].forEach(id => $(id).addEventListener('click', () => openOffer()));
+$('workflow-interview-btn').addEventListener('click', () => $('interview-btn').click());
+$('save-application-btn').addEventListener('click', saveApplication);
+$('applications-back-btn').addEventListener('click', () => showHomeFrom('applications-view'));
+$('save-offer-btn').addEventListener('click', saveOffer);
+$('offer-back-btn').addEventListener('click', () => showHomeFrom('offer-view'));
+$('applications-list').addEventListener('click', (e) => {
+  const deleteBtn = e.target.closest('[data-delete-id]');
+  const offerBtn = e.target.closest('[data-offer-id]');
+  if (deleteBtn) {
+    const records = applications().filter(item => item.id !== deleteBtn.dataset.deleteId);
+    writeLocal(APPLICATIONS_KEY, records); syncApplications(records); renderApplications();
+  }
+  if (offerBtn) {
+    const item = applications().find(row => row.id === offerBtn.dataset.offerId);
+    if (item) openOffer(item);
+  }
 });
 
 /* 报告页里的"生成模拟面试题"入口 */
@@ -1526,6 +1771,7 @@ $('login-btn').addEventListener('click', async () => {
     authToken = data.token; authEmail = data.email;
     try { localStorage.setItem('rd_token', authToken); localStorage.setItem('rd_email', authEmail); } catch {}
     renderAuthStatus();
+    hydrateCloudApplications();
     hideLogin();
     const act = pendingAction; pendingAction = null;
     if (act) act();
@@ -1570,24 +1816,26 @@ async function runAnalysis() {
 function readHomeInputs() {
   const resume = $('resume').value.trim();
   const jd = $('jd').value.trim();
+  const { company, jobTitle } = currentTarget();
   $('error').style.display = 'none';
   if (resume.length > MAX_LEN || jd.length > MAX_LEN) {
     showError('内容超过 8000 字上限,请精简后重试。');
     return null;
   }
-  lastInput = { resume, jd };
-  return { resume, jd };
+  lastInput = { resume, jd, company, jobTitle };
+  return lastInput;
 }
 
 $('analyze-btn').addEventListener('click', () => {
   const resume = $('resume').value.trim();
   const jd = $('jd').value.trim();
+  const { company, jobTitle } = currentTarget();
   $('error').style.display = 'none';
 
   if (resume.length < 50) return showError('简历内容太短了(至少 50 字),请粘贴完整的简历文本;想先看看效果可以点"查看演示"。');
   if (resume.length > MAX_LEN || jd.length > MAX_LEN) return showError('内容超过 8000 字上限,请精简后重试。');
 
-  lastInput = { resume, jd };
+  lastInput = { resume, jd, company, jobTitle };
   requireLogin(runAnalysis, 'input-panel');
 });
 
@@ -1617,6 +1865,7 @@ document.querySelectorAll('.feat-card[data-act]').forEach(card => {
 });
 
 renderAuthStatus();
+hydrateCloudApplications();
 
 /* ================= 事件 ================= */
 $('demo-btn').addEventListener('click', () => { prevScore = null; lastInput = { resume: '', jd: '' }; renderReport(DEMO_DATA); });
